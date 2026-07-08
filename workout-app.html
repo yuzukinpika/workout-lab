@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#fdf8f3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>筋トレ Lab</title>
 <style>
@@ -425,21 +426,46 @@ function load(){
   try{const o=JSON.parse(localStorage.getItem('workoutLab_v2'));if(o)return migrate(o);}catch(e){}
   return {entries:[],customEx:[],favs:[],archived:[],weekGoal:4,bwLog:[],profile:{},balanceMetric:'sets',balanceMin:10,balanceMax:20,rmFormula:'average'};
 }
+/* 読み込むデータは信頼しない（改ざんされたバックアップJSON対策）。
+   型を強制し、equip/part等は既知の値にホワイトリストで丸める。 */
 function migrate(d){
-  d.entries=d.entries||[];d.customEx=d.customEx||[];d.favs=d.favs||[];d.archived=d.archived||[];
-  d.weekGoal=d.weekGoal||4;d.bwLog=d.bwLog||[];d.profile=d.profile||{};
-  d.balanceMetric=d.balanceMetric||'sets';d.balanceMin=d.balanceMin||10;d.balanceMax=d.balanceMax||20;d.rmFormula=d.rmFormula||'average';
-  d.customEx.forEach(x=>{if(x.uni===undefined)x.uni=false;});
+  const str=v=>v==null?'':String(v);
+  const num=v=>{const n=Number(v);return isFinite(n)?n:0;};
+  const dateOk=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
+  const arr=v=>Array.isArray(v)?v:[];
+  d=d&&typeof d==='object'?d:{};
+  const out={};
+  out.entries=arr(d.entries).filter(e=>e&&dateOk(str(e.date))).map(e=>({
+    id:str(e.id)||Date.now()+''+Math.random().toString(36).slice(2,5),
+    date:str(e.date),exName:str(e.exName),
+    part:BODYPARTS.includes(e.part)?e.part:'体幹',
+    equip:EQUIPS[e.equip]?e.equip:'other',
+    uni:!!e.uni,sides:e.sides===1?1:(e.uni?2:1),
+    sets:arr(e.sets).map(s=>s||{}).map(s=>({w:num(s.w),reps:num(s.reps),rpe:(s.rpe==null||s.rpe==='')?null:num(s.rpe)}))
+  }));
+  out.customEx=arr(d.customEx).filter(x=>x&&x.name).map(x=>({
+    name:str(x.name),part:BODYPARTS.includes(x.part)?x.part:'体幹',
+    equip:EQUIPS[x.equip]?x.equip:'other',uni:!!x.uni,custom:true}));
+  out.favs=arr(d.favs).map(str);
+  out.archived=arr(d.archived).map(str);
+  out.weekGoal=Math.max(1,num(d.weekGoal))||4;
+  out.bwLog=arr(d.bwLog).filter(r=>r&&dateOk(str(r.date))&&num(r.kg)>0).map(r=>({date:str(r.date),kg:num(r.kg)}));
+  const p=(d.profile&&typeof d.profile==='object')?d.profile:{};
+  out.profile={goals:arr(p.goals||(p.goal?[p.goal]:[])).map(str),weak:str(p.weak),injury:str(p.injury),days:str(p.days)};
+  out.balanceMetric=d.balanceMetric==='volume'?'volume':'sets';
+  out.balanceMin=num(d.balanceMin)||10;out.balanceMax=num(d.balanceMax)||20;
+  out.rmFormula=['epley','brzycki','average'].includes(d.rmFormula)?d.rmFormula:'average';
   // 旧: 単一bodyweight → bwLogへ
-  if(d.bodyweight&&!d.bwLog.length){d.bwLog=[{date:today(),kg:Number(d.bodyweight)}];}
-  delete d.bodyweight;
-  return d;
+  if(d.bodyweight&&!out.bwLog.length&&num(d.bodyweight)>0){out.bwLog=[{date:today(),kg:num(d.bodyweight)}];}
+  return out;
 }
 function save(){localStorage.setItem(KEY,JSON.stringify(DB));}
 function exMap(){const m={};[...BUILTIN,...DB.customEx].forEach(x=>m[x.name]=x);return m;}
 
 /* ===================== util ===================== */
 const $=s=>document.querySelector(s);
+/* XSS対策: innerHTMLに入れるユーザー由来の文字列は必ずこれを通す */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=d=>{const z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());};
 const today=()=>fmt(new Date());
 function parseD(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
@@ -555,16 +581,27 @@ function closePicker(){$('#pickerScrim').classList.add('hide');}
 function renderCats(){$('#pickCats').innerHTML=['all',...BODYPARTS].map(c=>`<span class="chip ${c===pickCat?'on':''}" onclick="setCat('${c}')">${c==='all'?'すべて':c}</span>`).join('');}
 function setCat(c){pickCat=c;renderCats();renderPicker();}
 function toggleArchiveView(){showArchive=!showArchive;$('#archBtn').classList.toggle('on',showArchive);$('#pickTitle').firstChild.textContent=showArchive?'アーカイブ ':'種目を選ぶ ';renderCats();renderPicker();}
+/* 種目名をonclickのJS文字列に埋め込むとXSSになるため、配列インデックスで参照する */
+let __pickItems=[];
+function pickAct(i,act){
+  const x=__pickItems[i];if(!x)return;
+  if(act==='choose')chooseEx(x.name);
+  else if(act==='fav')toggleFav(x.name);
+  else if(act==='arch')setArchive(x.name,true);
+  else if(act==='restore')setArchive(x.name,false);
+}
 function renderPicker(){
   const q=$('#exSearch').value.trim();const all=[...BUILTIN,...DB.customEx];const arch=new Set(DB.archived);
   const match=x=>(pickCat==='all'||x.part===pickCat)&&(!q||x.name.includes(q));
+  __pickItems=[];
   const exrow=x=>{
+    const i=__pickItems.push(x)-1;
     const fav=DB.favs.includes(x.name),isArch=arch.has(x.name);
-    return `<div class="exrow"><div style="flex:1" onclick="chooseEx('${x.name}')"><div class="nm">${x.name}</div>
-        <div class="meta">${x.part}・${EQUIPS[x.equip]}${x.uni?'・片側ずつ':''}${x.custom?'・自作':''}</div></div>
-      ${isArch?`<span class="ico" onclick="setArchive('${x.name}',false)" title="復元">↩</span>`
-        :`<span class="ico ${fav?'on':''}" onclick="toggleFav('${x.name}')">${fav?'★':'☆'}</span>
-          <span class="ico" onclick="setArchive('${x.name}',true)" title="アーカイブ">🗄</span>`}</div>`;
+    return `<div class="exrow"><div style="flex:1" onclick="pickAct(${i},'choose')"><div class="nm">${esc(x.name)}</div>
+        <div class="meta">${esc(x.part)}・${esc(EQUIPS[x.equip]||'')}${x.uni?'・片側ずつ':''}${x.custom?'・自作':''}</div></div>
+      ${isArch?`<span class="ico" onclick="pickAct(${i},'restore')" title="復元">↩</span>`
+        :`<span class="ico ${fav?'on':''}" onclick="pickAct(${i},'fav')">${fav?'★':'☆'}</span>
+          <span class="ico" onclick="pickAct(${i},'arch')" title="アーカイブ">🗄</span>`}</div>`;
   };
   if(showArchive){const list=all.filter(x=>arch.has(x.name)&&match(x));
     $('#pickList').innerHTML='<div class="seclbl">アーカイブ済み</div>'+(list.length?list.map(exrow).join(''):'<div class="empty">アーカイブはありません</div>');return;}
@@ -586,7 +623,7 @@ function chooseEx(n){selEx=exMap()[n];curSide=2;closePicker();renderSelEx();}
 function renderSelEx(){
   if(!selEx){$('#selExName').textContent='種目を選ぶ';$('#selExMeta').textContent='タップしてライブラリから選択';$('#setsArea').classList.add('hide');return;}
   $('#selExName').textContent=selEx.name;
-  $('#selExMeta').innerHTML=`<span class="eqtag">${selEx.part}</span> <span class="eqtag">${EQUIPS[selEx.equip]}</span>${selEx.uni?' <span class="eqtag">片側ずつ</span>':''}`;
+  $('#selExMeta').innerHTML=`<span class="eqtag">${esc(selEx.part)}</span> <span class="eqtag">${esc(EQUIPS[selEx.equip]||'')}</span>${selEx.uni?' <span class="eqtag">片側ずつ</span>':''}`;
   $('#setsArea').classList.remove('hide');
   $('#sideSel').classList.toggle('hide',!selEx.uni);
   if(selEx.uni)setSide(2);
@@ -609,9 +646,9 @@ function renderSets(){
   const eq=selEx?selEx.equip:'barbell';
   $('#sets').innerHTML=setsState.map((s,i)=>`
     <div class="setrow"><span class="n">${i+1}</span>
-      <div class="field"><small>${unitLabel(eq)}</small><input type="number" inputmode="decimal" placeholder="${eq==='bodyweight'?'0':'kg'}" value="${s.w}" onchange="setVal(${i},'w',this.value)"></div>
-      <div class="field"><small>回数</small><input type="number" inputmode="numeric" placeholder="回" value="${s.reps}" onchange="setVal(${i},'reps',this.value)"></div>
-      <div class="field"><small>RPE</small><input type="number" inputmode="decimal" placeholder="任意" value="${s.rpe}" onchange="setVal(${i},'rpe',this.value)"></div>
+      <div class="field"><small>${unitLabel(eq)}</small><input type="number" inputmode="decimal" placeholder="${eq==='bodyweight'?'0':'kg'}" value="${esc(s.w)}" onchange="setVal(${i},'w',this.value)"></div>
+      <div class="field"><small>回数</small><input type="number" inputmode="numeric" placeholder="回" value="${esc(s.reps)}" onchange="setVal(${i},'reps',this.value)"></div>
+      <div class="field"><small>RPE</small><input type="number" inputmode="decimal" placeholder="任意" value="${esc(s.rpe)}" onchange="setVal(${i},'rpe',this.value)"></div>
       <button class="del" onclick="rmSet(${i})">×</button></div>`).join('');
 }
 function setVal(i,k,v){setsState[i][k]=v;}
@@ -621,7 +658,7 @@ function showLastHint(){
   if(!selEx){$('#lastHint').textContent='';return;}
   const past=DB.entries.filter(e=>e.exName===selEx.name).sort((a,b)=>a.date<b.date?1:-1);
   if(!past.length){$('#lastHint').innerHTML='<span class="muted">前回の記録なし — 新しい種目です</span>';return;}
-  const p=past[0];$('#lastHint').innerHTML=`<span class="sub">前回 ${jpDate(p.date)}: </span>`+p.sets.map(s=>setDisp(p,s)).join(' / ');
+  const p=past[0];$('#lastHint').innerHTML=`<span class="sub">前回 ${jpDate(p.date)}: </span>`+esc(p.sets.map(s=>setDisp(p,s)).join(' / '));
 }
 function saveEntry(){
   if(!selEx){toast('種目を選んでください');return;}
@@ -635,10 +672,10 @@ function renderTodayLog(){const list=DB.entries.filter(e=>e.date===recDate);
   $('#todayLog').innerHTML=list.length?list.map(logCard).join(''):'<div class="empty">まだ記録がありません</div>';}
 function logCard(e){
   const sets=e.sets.map(s=>setDisp(e,s)+(s.rpe?` @${s.rpe}`:'')).join('  /  ');
-  return `<div class="logrec" onclick="openEdit('${e.id}')">
-    <div style="display:flex;align-items:center"><span class="ex">${e.exName}</span>
-    <span class="dt" style="margin-left:auto">${e.part}・${Math.round(entryVolume(e)).toLocaleString()}vol ▸</span></div>
-    <div class="sub" style="font-size:13px">${sets}</div></div>`;
+  return `<div class="logrec" data-id="${esc(e.id)}" onclick="openEdit(this.dataset.id)">
+    <div style="display:flex;align-items:center"><span class="ex">${esc(e.exName)}</span>
+    <span class="dt" style="margin-left:auto">${esc(e.part)}・${Math.round(entryVolume(e)).toLocaleString()}vol ▸</span></div>
+    <div class="sub" style="font-size:13px">${esc(sets)}</div></div>`;
 }
 
 /* ===================== 編集 ===================== */
@@ -658,9 +695,9 @@ function renderEditSets(){
   const eq=$('#editScrim').dataset.equip;
   $('#editSets').innerHTML=editSetsState.map((s,i)=>`
     <div class="setrow"><span class="n">${i+1}</span>
-      <div class="field"><small>${unitLabel(eq)}</small><input type="number" value="${s.w}" onchange="editVal(${i},'w',this.value)"></div>
-      <div class="field"><small>回数</small><input type="number" value="${s.reps}" onchange="editVal(${i},'reps',this.value)"></div>
-      <div class="field"><small>RPE</small><input type="number" value="${s.rpe}" onchange="editVal(${i},'rpe',this.value)"></div>
+      <div class="field"><small>${unitLabel(eq)}</small><input type="number" value="${esc(s.w)}" onchange="editVal(${i},'w',this.value)"></div>
+      <div class="field"><small>回数</small><input type="number" value="${esc(s.reps)}" onchange="editVal(${i},'reps',this.value)"></div>
+      <div class="field"><small>RPE</small><input type="number" value="${esc(s.rpe)}" onchange="editVal(${i},'rpe',this.value)"></div>
       <button class="del" onclick="editRm(${i})">×</button></div>`).join('');
 }
 function editVal(i,k,v){editSetsState[i][k]=v;}
@@ -807,7 +844,7 @@ function fillExDetailSel(){
   const byEx={};DB.entries.forEach(e=>{byEx[e.exName]=(byEx[e.exName]||0)+1;});
   const names=Object.keys(byEx).sort((a,b)=>byEx[b]-byEx[a]);
   const sel=$('#exDetailSel');const prev=sel.value;
-  sel.innerHTML=names.length?names.map(n=>`<option value="${n}">${n}（${byEx[n]}回）</option>`).join(''):'<option>記録なし</option>';
+  sel.innerHTML=names.length?names.map(n=>`<option value="${esc(n)}">${esc(n)}（${byEx[n]}回）</option>`).join(''):'<option>記録なし</option>';
   if(names.includes(prev))sel.value=prev;
 }
 function renderExDetail(){
@@ -865,7 +902,7 @@ function renderBW(){
   const pts=log.map(r=>({l:(parseD(r.date).getMonth()+1)+'/'+parseD(r.date).getDate(),v:r.kg}));
   $('#bwChart').innerHTML=log.length>=2?lineSVG(pts,'#0891b2',{fmt:v=>v.toFixed(1)+'kg'}):`<div class="muted">記録: ${log[0].kg}kg（${jpDate(log[0].date)}）</div>`;
   const recent=log.slice(-4).reverse();
-  $('#bwList').innerHTML=recent.map(r=>`<div class="legrow"><span class="sub" style="width:90px">${jpDate(r.date)}</span> <b>${r.kg}kg</b> <span class="del" style="margin-left:auto;width:auto" onclick="rmBW('${r.date}')">削除</span></div>`).join('');
+  $('#bwList').innerHTML=recent.map(r=>`<div class="legrow"><span class="sub" style="width:90px">${jpDate(r.date)}</span> <b>${esc(r.kg)}kg</b> <span class="del" style="margin-left:auto;width:auto" data-d="${esc(r.date)}" onclick="rmBW(this.dataset.d)">削除</span></div>`).join('');
 }
 function rmBW(date){DB.bwLog=DB.bwLog.filter(r=>r.date!==date);save();renderBW();renderVolBars();toast('削除しました');}
 
@@ -897,7 +934,7 @@ function renderExportExList(){
   DB.entries.filter(inR).forEach(e=>{counts[e.exName]=(counts[e.exName]||0)+1;});
   exNames=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
   exNames.forEach(n=>{if(exSel[n]===undefined)exSel[n]=true;});
-  $('#pExList').innerHTML=exNames.length?exNames.map((n,i)=>`<label class="check"><input type="checkbox" ${exSel[n]?'checked':''} onchange="exSel[exNames[${i}]]=this.checked"> ${n}（${counts[n]}回）</label>`).join(''):'<div class="empty">この期間に記録がありません</div>';
+  $('#pExList').innerHTML=exNames.length?exNames.map((n,i)=>`<label class="check"><input type="checkbox" ${exSel[n]?'checked':''} onchange="exSel[exNames[${i}]]=this.checked"> ${esc(n)}（${counts[n]}回）</label>`).join(''):'<div class="empty">この期間に記録がありません</div>';
 }
 function observations(ents,targets){
   const out=[];
