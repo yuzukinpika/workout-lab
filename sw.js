@@ -3,10 +3,11 @@
    - HTML(ナビゲーション)はネットワーク優先: オンラインなら常に最新、オフラインならキャッシュ。
    - アイコン・manifest等はキャッシュ優先。
    - アプリを更新したら CACHE のバージョン番号を上げること（古いキャッシュは activate で削除される）。 */
-const CACHE = 'kintore-lab-v2';
+const CACHE = 'kintore-lab-v3';
 const ASSETS = [
   './index.html',
   './manifest.webmanifest',
+  './apple-touch-icon.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png'
