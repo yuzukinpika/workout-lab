@@ -40,7 +40,7 @@
     border-radius:var(--r2);padding:12px 13px;color:var(--txt);outline:none}
   .inp:focus{border-color:var(--acc)}
   textarea.inp{resize:vertical;min-height:54px}
-  .row{display:flex;gap:9px}.row>*{flex:1}
+  .row{display:flex;gap:9px}.row>*{flex:1;min-width:0}
   .btn{background:var(--grad);color:#fff;font-weight:800;border-radius:var(--r2);padding:13px;width:100%;font-size:15px;box-shadow:0 2px 8px rgba(249,115,22,.3)}
   .btn:active{transform:scale(.98)}
   .btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line);box-shadow:none}
@@ -122,6 +122,16 @@
   .seclbl{font-size:11px;color:var(--mut);font-weight:700;margin:12px 0 2px;letter-spacing:.5px}
   .check{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--txt);margin-top:8px}
   .check input{width:18px;height:18px}
+  .bw-form{align-items:flex-end}
+  .bw-date{flex:1.3;min-width:0}
+  .bw-value{min-width:0}
+  .bw-submit{flex:none;display:flex;align-items:flex-end}
+  .bw-submit .btn{width:auto;padding:12px 14px}
+  @media (max-width:430px){
+    .bw-form{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(92px,.75fr);gap:9px}
+    .bw-submit{grid-column:1/-1}
+    .bw-submit .btn{width:100%}
+  }
 </style>
 </head>
 <body>
@@ -242,10 +252,10 @@
 
   <div class="card">
     <h2>⚖️ 体重推移</h2>
-    <div class="row">
-      <div style="flex:1.3"><label class="fld" style="margin-top:0">日付</label><input type="date" id="bwDate" class="inp"></div>
-      <div><label class="fld" style="margin-top:0">体重kg</label><input type="number" step="0.1" id="bwVal" class="inp" placeholder="65"></div>
-      <div style="flex:none;display:flex;align-items:flex-end"><button class="btn sm" style="width:auto;padding:12px 14px" onclick="addBW()">記録</button></div>
+    <div class="row bw-form">
+      <div class="bw-date"><label class="fld" style="margin-top:0">日付</label><input type="date" id="bwDate" class="inp"></div>
+      <div class="bw-value"><label class="fld" style="margin-top:0">体重kg</label><input type="number" step="0.1" id="bwVal" class="inp" placeholder="65"></div>
+      <div class="bw-submit"><button class="btn sm" onclick="addBW()">記録</button></div>
     </div>
     <div id="bwChart" style="margin-top:12px"></div>
     <div id="bwList" style="margin-top:8px"></div>
