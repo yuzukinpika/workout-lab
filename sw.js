@@ -6,6 +6,7 @@
 const CACHE = 'kintore-lab-v3';
 const ASSETS = [
   './index.html',
+  './workout-app.html',
   './manifest.webmanifest',
   './apple-touch-icon.png',
   './icons/icon-192.png',
@@ -38,7 +39,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(req, copy));
           return res;
         })
-        .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
+        .catch(() => caches.match(req).then(r => r || caches.match('./index.html') || caches.match('./workout-app.html')))
     );
   } else {
     // キャッシュ優先（なければ取得してキャッシュ）
