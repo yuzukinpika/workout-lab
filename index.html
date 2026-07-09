@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#fdf8f3">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>筋トレ Lab</title>
+<style>
+  :root{
+    --bg:#fdf8f3;--bg2:#f6efe7;--card:#ffffff;--card2:#f3ece3;--line:#eadfd2;
+    --txt:#1c1917;--sub:#78716c;--mut:#a8a29e;--acc:#f97316;--ok:#16a34a;
+    --warn:#d97706;--bad:#dc2626;--grad:linear-gradient(135deg,#f97316,#ef4444);--r:16px;--r2:12px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Sans","Noto Sans JP",sans-serif;
+    background:var(--bg);color:var(--txt);line-height:1.5;-webkit-font-smoothing:antialiased;
+    padding-bottom:84px;max-width:560px;margin:0 auto;min-height:100vh;
+    background-image:radial-gradient(900px 400px at 50% -10%,rgba(249,115,22,.08),transparent 60%)}
+  h1,h2,h3{margin:0;font-weight:700}
+  button{font-family:inherit;cursor:pointer;border:none;color:inherit;background:none}
+  input,select,textarea{font-family:inherit;font-size:16px}
+  .wrap{padding:14px 14px 0}
+  header.top{display:flex;align-items:center;justify-content:space-between;padding:16px 14px 6px}
+  header.top .logo{display:flex;align-items:center;gap:9px;font-size:19px;font-weight:800;letter-spacing:.5px}
+  .logo .ic{font-size:21px;line-height:1}
+  .streakpill{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--line);
+    padding:6px 11px;border-radius:999px;font-size:13px;font-weight:700}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:13px}
+  .card h2{font-size:15px;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+  .card h2 .sub{font-size:12px;font-weight:500;color:var(--sub);margin-left:auto}
+  label.fld{display:block;font-size:12.5px;color:var(--sub);margin:11px 0 5px;font-weight:600}
+  .inp,select.inp,textarea.inp{width:100%;background:var(--bg2);border:1px solid var(--line);
+    border-radius:var(--r2);padding:12px 13px;color:var(--txt);outline:none}
+  .inp:focus{border-color:var(--acc)}
+  textarea.inp{resize:vertical;min-height:54px}
+  .row{display:flex;gap:9px}.row>*{flex:1}
+  .btn{background:var(--grad);color:#fff;font-weight:800;border-radius:var(--r2);padding:13px;width:100%;font-size:15px;box-shadow:0 2px 8px rgba(249,115,22,.3)}
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line);box-shadow:none}
+  .btn.sm{padding:9px 12px;font-size:13px}
+  .chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--line);
+    color:var(--sub);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;margin:0 6px 6px 0}
+  .chip.on{background:rgba(249,115,22,.12);border-color:var(--acc);color:var(--acc)}
+  .muted{color:var(--mut);font-size:13px}.sub{color:var(--sub)}
+  .big{font-size:28px;font-weight:800;line-height:1.1}
+  .stat{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2);padding:12px}
+  .stat .lbl{font-size:11.5px;color:var(--sub);margin-bottom:4px;font-weight:600}
+  .barwrap{display:flex;align-items:flex-end;gap:5px;height:120px;margin-top:6px}
+  .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;min-width:0}
+  .bar .fill{width:100%;background:var(--grad);border-radius:6px 6px 3px 3px;min-height:3px;transition:height .5s}
+  .bar .bl{font-size:9.5px;color:var(--mut);white-space:nowrap}
+  .bar.today .fill{box-shadow:0 0 10px var(--acc)}
+  .seg{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:3px;gap:3px}
+  .seg button{flex:1;padding:8px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--sub)}
+  .seg button.on{background:var(--card2);color:var(--txt)}
+  .curdate{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2);
+    padding:13px;font-weight:700;text-align:center;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px}
+  .cal{margin-top:8px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2);padding:10px}
+  .calhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-weight:700}
+  .calhd button{padding:6px 12px;border-radius:8px;background:var(--card2);font-size:16px}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+  .calgrid .dow{font-size:10.5px;color:var(--mut);padding:3px 0}
+  .calgrid .day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    border-radius:9px;font-size:13.5px;position:relative;color:var(--txt)}
+  .calgrid .day.empty{visibility:hidden}
+  .calgrid .day.sel{background:var(--grad);color:#fff;font-weight:800}
+  .calgrid .day.today{border:1px solid var(--acc)}
+  .calgrid .day .mk{width:4px;height:4px;border-radius:50%;background:var(--acc);position:absolute;bottom:4px}
+  .calgrid .day.sel .mk{background:#fff}
+  .calgrid .day.did{background:var(--grad);color:#fff;font-weight:800}
+  .exsel{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r2);
+    padding:13px;display:flex;align-items:center;gap:10px;text-align:left}
+  .exsel .nm{font-weight:700;font-size:15px}.exsel .meta{font-size:11.5px;color:var(--sub)}
+  .exsel .ar{margin-left:auto;color:var(--mut)}
+  .eqtag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:var(--card2);color:var(--sub)}
+  .setrow{display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--line);
+    border-radius:10px;padding:8px 10px;margin-bottom:7px}
+  .setrow .n{width:22px;height:22px;border-radius:50%;background:var(--card2);display:flex;align-items:center;
+    justify-content:center;font-size:12px;font-weight:700;color:var(--sub);flex:none}
+  .setrow .field{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center}
+  .setrow .field small{font-size:9px;color:var(--mut);margin-bottom:2px}
+  .setrow input{width:100%;background:#fff;border:1px solid var(--line);border-radius:8px;padding:9px;text-align:center;color:var(--txt)}
+  .del{flex:none;width:30px;color:var(--bad);font-size:18px;background:none}
+  .nav{position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;display:flex;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    padding:7px 6px calc(7px + env(safe-area-inset-bottom));z-index:50}
+  .nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--mut);font-size:10.5px;font-weight:600;padding:5px 0}
+  .nav button.on{color:var(--acc)}.nav .ic{font-size:21px;line-height:1}
+  .hide{display:none!important}
+  .logrec{border-left:3px solid var(--acc);padding:9px 11px;background:var(--bg2);border-radius:0 10px 10px 0;margin-bottom:8px}
+  .logrec .ex{font-weight:700;font-size:14px}.logrec .dt{font-size:11.5px;color:var(--mut)}
+  .badge{display:inline-flex;flex-direction:column;align-items:center;gap:4px;width:72px;text-align:center;margin:0 4px 10px}
+  .badge .ic{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--bg2);border:1px solid var(--line)}
+  .badge.got .ic{background:var(--grad);border:none;box-shadow:0 0 14px rgba(249,115,22,.4)}
+  .badge.got .nm{color:var(--txt)}.badge .nm{font-size:10.5px;color:var(--mut);font-weight:600;line-height:1.2}
+  .legrow{display:flex;align-items:center;gap:7px;font-size:13px;margin-bottom:5px}
+  .sw{width:11px;height:11px;border-radius:3px;flex:none}.pct{font-size:11px;color:var(--mut)}
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--ok);color:#fff;
+    font-weight:700;padding:11px 18px;border-radius:999px;font-size:14px;z-index:120;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+  .toast.show{opacity:1}
+  .empty{text-align:center;color:var(--mut);padding:22px 10px;font-size:13px}
+  .ring{position:relative;width:96px;height:96px;flex:none}
+  .ringn{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .ringn b{font-size:26px;font-weight:800}.ringn span{font-size:10px;color:var(--sub)}
+  .chartlbl{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin:4px 0}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+  .scrim.hide{display:none}
+  .sheet{background:var(--card);border:1px solid var(--line);border-radius:20px 20px 0 0;width:100%;max-width:560px;
+    max-height:88vh;overflow:auto;padding:16px 15px calc(20px + env(safe-area-inset-bottom))}
+  .sheet h3{font-size:16px;margin-bottom:10px;display:flex;align-items:center}
+  .sheet h3 .close{margin-left:auto;font-size:22px;color:var(--mut)}
+  .exrow{display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--line)}
+  .exrow .nm{font-weight:600;font-size:14.5px}.exrow .meta{font-size:11px;color:var(--sub)}
+  .exrow .ico{font-size:17px;color:var(--mut);padding:5px;flex:none}.exrow .ico.on{color:var(--warn)}
+  .seclbl{font-size:11px;color:var(--mut);font-weight:700;margin:12px 0 2px;letter-spacing:.5px}
+  .check{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--txt);margin-top:8px}
+  .check input{width:18px;height:18px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="logo"><span class="ic">💪</span> 筋トレ Lab</div>
+  <div class="streakpill">🔥 <span id="streakNum">0</span>週連続</div>
+</header>
+
+<!-- ============ 記録 ============ -->
+<section id="page-log" class="wrap">
+  <div class="card">
+    <h2>📝 トレーニングを記録</h2>
+    <label class="fld">日付</label>
+    <button class="curdate" id="curDate" onclick="toggleCal()">—</button>
+    <div id="cal" class="cal hide"></div>
+
+    <label class="fld">種目</label>
+    <button class="exsel" onclick="openPicker()">
+      <div><div class="nm" id="selExName">種目を選ぶ</div><div class="meta" id="selExMeta">タップしてライブラリから選択</div></div>
+      <span class="ar">▸</span>
+    </button>
+    <div id="lastHint" class="muted" style="margin-top:7px"></div>
+
+    <div id="setsArea" class="hide">
+      <div id="sideSel" class="hide" style="margin-top:12px">
+        <label class="fld" style="margin-top:0">実施範囲（片側ずつ行う種目）</label>
+        <div class="seg"><button id="sideBoth" class="on" onclick="setSide(2)">両側</button><button id="sideOne" onclick="setSide(1)">片側のみ</button></div>
+      </div>
+      <label class="fld" id="setsLabel">セット</label>
+      <div id="sets"></div>
+      <button class="btn ghost sm" style="width:100%;margin-top:2px" onclick="addSet()">＋ セットを追加（前回値を複製）</button>
+      <div style="height:12px"></div>
+      <button class="btn" onclick="saveEntry()">この種目を保存</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🗒️ この日の記録 <span class="sub" id="todayLabel"></span></h2>
+    <div id="todayLog"></div>
+  </div>
+</section>
+
+<!-- ============ 履歴 ============ -->
+<section id="page-hist" class="wrap hide">
+  <div class="card"><h2>📚 履歴 <span class="sub">タップで編集・削除</span></h2><div id="histList"></div></div>
+</section>
+
+<!-- ============ 分析 ============ -->
+<section id="page-dash" class="wrap hide">
+  <div class="card">
+    <h2>🔥 習慣化</h2>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="ring">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="42" fill="none" stroke="#f3e8db" stroke-width="8"/>
+          <circle id="weekRing" cx="48" cy="48" r="42" fill="none" stroke="url(#g1)" stroke-width="8"
+            stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 48 48)"/>
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f97316"/><stop offset="1" stop-color="#ef4444"/></linearGradient></defs>
+        </svg>
+        <div class="ringn"><b id="weekDays">0</b><span>今週/目標</span></div>
+      </div>
+      <div style="flex:1">
+        <div class="row" style="margin-bottom:9px">
+          <div class="stat"><div class="lbl">週目標の連続達成</div><div class="big" id="streakBig">0</div></div>
+          <div class="stat"><div class="lbl">総セッション</div><div class="big" id="totSess">0</div></div>
+        </div>
+        <div class="muted" id="habitMsg"></div>
+      </div>
+    </div>
+    <div style="margin-top:14px" id="badges"></div>
+  </div>
+
+  <div class="card">
+    <h2>🗓️ 活動カレンダー <span class="sub" id="actCalLbl"></span></h2>
+    <div id="actCal" class="cal" style="margin-top:0"></div>
+  </div>
+
+  <div class="card">
+    <h2>📊 ボリューム推移</h2>
+    <div class="seg" style="margin-bottom:6px">
+      <button id="pmWeek" class="on" onclick="setVolMode('week')">週別</button>
+      <button id="pmMonth" onclick="setVolMode('month')">月別</button>
+      <button id="pmCustom" onclick="setVolMode('custom')">任意期間</button>
+    </div>
+    <div id="customRange" class="hide" style="margin:8px 0">
+      <div class="row">
+        <div><label class="fld" style="margin-top:0">開始</label><input type="date" id="rangeFrom" class="inp" onchange="renderVolBars()"></div>
+        <div><label class="fld" style="margin-top:0">終了</label><input type="date" id="rangeTo" class="inp" onchange="renderVolBars()"></div>
+      </div>
+    </div>
+    <div class="barwrap" id="volBars"></div>
+    <div class="muted" style="margin-top:8px;text-align:center" id="volNote"></div>
+  </div>
+
+  <div class="card"><h2>🥧 部位バランス <span class="sub">今週</span></h2><div id="balance"></div></div>
+
+  <div class="card">
+    <h2>💪 種目別の詳細</h2>
+    <select id="exDetailSel" class="inp" onchange="renderExDetail()"></select>
+    <div id="exDetail" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>🎚️ RPE推移 <span class="sub">週平均・疲労の目安</span></h2>
+    <div id="rpeChart"></div>
+    <p class="muted" style="margin-top:6px">RPEが継続的に高い（9前後）と疲労蓄積のサイン。適度なディロードを。</p>
+  </div>
+
+  <div class="card">
+    <h2>📅 トレーニング頻度 <span class="sub">週あたりの日数</span></h2>
+    <div class="row" style="margin-bottom:8px">
+      <div class="stat"><div class="lbl">直近4週 平均</div><div class="big" id="freqAvg">0<span style="font-size:13px"> 回/週</span></div></div>
+      <div class="stat"><div class="lbl">今週</div><div class="big" id="freqNow">0<span style="font-size:13px"> 回</span></div></div>
+    </div>
+    <div class="barwrap" id="freqBars" style="height:90px"></div>
+  </div>
+
+  <div class="card">
+    <h2>⚖️ 体重推移</h2>
+    <div class="row">
+      <div style="flex:1.3"><label class="fld" style="margin-top:0">日付</label><input type="date" id="bwDate" class="inp"></div>
+      <div><label class="fld" style="margin-top:0">体重kg</label><input type="number" step="0.1" id="bwVal" class="inp" placeholder="65"></div>
+      <div style="flex:none;display:flex;align-items:flex-end"><button class="btn sm" style="width:auto;padding:12px 14px" onclick="addBW()">記録</button></div>
+    </div>
+    <div id="bwChart" style="margin-top:12px"></div>
+    <div id="bwList" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <h2>🤖 AIコーチ用エクスポート</h2>
+    <p class="sub" style="font-size:13px;margin-top:-4px">目標・コンディションを入力し、期間と対象種目を選んで「推移データ＋アプリの観察メモ＋あなたの文脈」をファイル化。チャット版AIに添付すれば費用ゼロで個別アドバイスが得られます。</p>
+    <button class="btn" style="margin-top:8px" onclick="openExportSheet()">📄 コーチング用ファイルを作成</button>
+  </div>
+
+  <div class="card">
+    <h2>🎛️ 設定</h2>
+    <label class="fld" style="margin-top:0">週間目標（回/週）</label>
+    <input type="number" id="wgInput" class="inp" onchange="setWeekGoal(this.value)">
+    <label class="fld">部位バランスの指標</label>
+    <div class="seg"><button id="bmSets" onclick="setBalanceMetric('sets')">セット数</button><button id="bmVol" onclick="setBalanceMetric('volume')">ボリューム</button></div>
+    <div id="balRangeWrap">
+      <label class="fld">目安レンジ（セット/週）</label>
+      <div class="row"><input type="number" id="balMin" class="inp" placeholder="下限" onchange="setBalanceRange()"><input type="number" id="balMax" class="inp" placeholder="上限" onchange="setBalanceRange()"></div>
+    </div>
+    <label class="fld">推定1RMの計算式</label>
+    <select id="rmFormula" class="inp" onchange="setRMFormula(this.value)">
+      <option value="average">平均（Epley＋Brzycki・推奨）</option>
+      <option value="epley">Epley</option>
+      <option value="brzycki">Brzycki</option>
+    </select>
+    <p class="muted" style="margin-top:6px">※ 推定1RMはどの式も近似です。10〜12回を超えると誤差が大きくなります（低レップほど正確）。</p>
+  </div>
+
+  <div class="card">
+    <h2>⚙️ データ管理</h2>
+    <div class="row">
+      <button class="btn ghost sm" style="width:100%" onclick="exportData()">バックアップ</button>
+      <button class="btn ghost sm" style="width:100%" onclick="document.getElementById('imp').click()">読み込み</button>
+    </div>
+    <input type="file" id="imp" accept="application/json" class="hide" onchange="importData(event)">
+    <button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="loadDemo()">デモデータを入れて試す</button>
+    <button class="btn ghost sm" style="width:100%;margin-top:8px;color:var(--bad)" onclick="wipe()">全データ削除</button>
+  </div>
+</section>
+
+<nav class="nav">
+  <button data-pg="log" class="on" onclick="go('log')"><span class="ic">📝</span>記録</button>
+  <button data-pg="hist" onclick="go('hist')"><span class="ic">📚</span>履歴</button>
+  <button data-pg="dash" onclick="go('dash')"><span class="ic">📊</span>分析</button>
+</nav>
+
+<!-- ピッカー -->
+<div class="scrim hide" id="pickerScrim" onclick="if(event.target===this)closePicker()">
+  <div class="sheet">
+    <h3 id="pickTitle">種目を選ぶ <span class="close" onclick="closePicker()">×</span></h3>
+    <input class="inp" id="exSearch" placeholder="🔍 種目名で検索" oninput="renderPicker()">
+    <div id="pickCats" style="margin-top:10px"></div>
+    <div id="pickList"></div>
+    <div id="customForm" class="hide" style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">
+      <label class="fld">自作種目の名前</label>
+      <input class="inp" id="cName" placeholder="例: ケトルベルスイング">
+      <div class="row" style="margin-top:8px">
+        <div><label class="fld">部位</label><select class="inp" id="cPart"></select></div>
+        <div><label class="fld">器具</label><select class="inp" id="cEquip"></select></div>
+      </div>
+      <label class="check"><input type="checkbox" id="cUni"> 片側ずつ行う種目（記録時に両側/片側を選べる）</label>
+      <button class="btn sm" style="width:100%;margin-top:10px" onclick="addCustom()">追加して選択</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost sm" style="width:100%" onclick="toggleCustom()">＋ 自作種目</button>
+      <button class="btn ghost sm" style="width:100%" id="archBtn" onclick="toggleArchiveView()">🗄 アーカイブ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 編集 -->
+<div class="scrim hide" id="editScrim" onclick="if(event.target===this)closeEdit()">
+  <div class="sheet">
+    <h3 id="editTitle">記録を編集 <span class="close" onclick="closeEdit()">×</span></h3>
+    <label class="fld">日付</label>
+    <input type="date" class="inp" id="editDate">
+    <div id="editSideSel" class="hide" style="margin-top:10px">
+      <label class="fld" style="margin-top:0">実施範囲</label>
+      <div class="seg"><button id="eSideBoth" onclick="setEditSide(2)">両側</button><button id="eSideOne" onclick="setEditSide(1)">片側のみ</button></div>
+    </div>
+    <label class="fld" id="editSetsLabel">セット</label>
+    <div id="editSets"></div>
+    <button class="btn ghost sm" style="width:100%;margin-top:2px" onclick="editAddSet()">＋ セット追加</button>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost sm" style="width:100%;color:var(--bad)" onclick="editDelete()">削除</button>
+      <button class="btn sm" style="width:100%" onclick="editSave()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- エクスポート設定 -->
+<div class="scrim hide" id="exportScrim" onclick="if(event.target===this)closeExport()">
+  <div class="sheet">
+    <h3>コーチング用ファイル <span class="close" onclick="closeExport()">×</span></h3>
+    <p class="sub" style="font-size:12.5px;margin-top:-4px">入力内容は次回も保存されます。空欄でもOK。</p>
+
+    <div class="seclbl">🎯 目標・コンディション</div>
+    <label class="fld" style="margin-top:4px">目標（複数選択OK）</label>
+    <div id="pGoalBox">
+      <label class="check"><input type="checkbox" class="goalchk" value="筋肥大"> 筋肥大（マッスル）</label>
+      <label class="check"><input type="checkbox" class="goalchk" value="筋力向上"> 筋力向上（ストレングス）</label>
+      <label class="check"><input type="checkbox" class="goalchk" value="増量（バルク）"> 増量（バルク）</label>
+      <label class="check"><input type="checkbox" class="goalchk" value="減量（カット）"> 減量（カット）</label>
+      <label class="check"><input type="checkbox" class="goalchk" value="現状維持・健康"> 現状維持・健康</label>
+    </div>
+    <label class="fld">弱点・伸ばしたい部位</label>
+    <input id="pWeak" class="inp" placeholder="例: 肩の前部、上腕二頭筋">
+    <label class="fld">ケガ・制限</label>
+    <input id="pInjury" class="inp" placeholder="例: 右肩に違和感、腰は無理しない">
+    <label class="fld">週のトレ可能日数</label>
+    <input type="number" id="pDays" class="inp" placeholder="例: 4">
+
+    <div class="seclbl" style="margin-top:14px">📅 出力期間</div>
+    <select id="pPeriod" class="inp" onchange="renderExportExList()">
+      <option value="14">直近2週</option>
+      <option value="28">直近4週</option>
+      <option value="56" selected>直近8週</option>
+      <option value="84">直近12週</option>
+      <option value="168">直近6ヶ月</option>
+      <option value="365">直近1年</option>
+      <option value="0">全期間</option>
+      <option value="custom">任意期間（日付指定）</option>
+    </select>
+    <div id="pCustomRange" class="hide" style="margin-top:8px">
+      <div class="row">
+        <div><label class="fld" style="margin-top:0">開始</label><input type="date" id="pFrom" class="inp" onchange="renderExportExList()"></div>
+        <div><label class="fld" style="margin-top:0">終了</label><input type="date" id="pTo" class="inp" onchange="renderExportExList()"></div>
+      </div>
+    </div>
+
+    <div class="seclbl" style="margin-top:14px">🏋️ 対象種目</div>
+    <div class="row" style="margin:2px 0 6px">
+      <button class="btn ghost sm" style="width:100%" onclick="exExAll(true)">全選択</button>
+      <button class="btn ghost sm" style="width:100%" onclick="exExAll(false)">全解除</button>
+    </div>
+    <div id="pExList" style="max-height:160px;overflow:auto"></div>
+
+    <button class="btn" style="margin-top:14px" onclick="buildExport()">📄 ファイルを作成</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== 定数 ===================== */
+const KEY='workoutLab_v4';
+const BODYPARTS=['胸','背中','肩','腕','脚','体幹'];
+const EQUIPS={barbell:'バーベル',dumbbell:'ダンベル',machine:'マシン',cable:'ケーブル',bodyweight:'自重',assist:'アシスト',other:'その他'};
+const DAYNAMES=['日','月','火','水','木','金','土'];
+const BUILTIN=[
+  ['ベンチプレス','胸','barbell',0],['インクラインベンチプレス','胸','barbell',0],
+  ['ダンベルベンチプレス','胸','dumbbell',0],['インクラインダンベルプレス','胸','dumbbell',0],
+  ['ダンベルフライ','胸','dumbbell',0],['チェストプレス','胸','machine',0],
+  ['ペックフライ','胸','machine',0],['ケーブルクロスオーバー','胸','cable',0],['プッシュアップ','胸','bodyweight',0],
+  ['デッドリフト','背中','barbell',0],['ベントオーバーロウ','背中','barbell',0],
+  ['ラットプルダウン','背中','cable',0],['シーテッドロウ','背中','machine',0],
+  ['ワンハンドダンベルロウ','背中','dumbbell',1],['懸垂','背中','bodyweight',0],
+  ['アシスト懸垂','背中','assist',0],['ケーブルプルオーバー','背中','cable',0],
+  ['ショルダープレス','肩','barbell',0],['ダンベルショルダープレス','肩','dumbbell',0],
+  ['サイドレイズ','肩','dumbbell',0],['リアレイズ','肩','dumbbell',0],
+  ['アーノルドプレス','肩','dumbbell',0],['フェイスプル','肩','cable',0],['マシンショルダープレス','肩','machine',0],
+  ['バーベルカール','腕','barbell',0],['ダンベルカール','腕','dumbbell',0],
+  ['ハンマーカール','腕','dumbbell',0],['コンセントレーションカール','腕','dumbbell',1],
+  ['トライセプスプレスダウン','腕','cable',0],['ナローベンチプレス','腕','barbell',0],
+  ['ライイングエクステンション','腕','barbell',0],['ケーブルカール','腕','cable',0],
+  ['スクワット','脚','barbell',0],['レッグプレス','脚','machine',0],
+  ['レッグエクステンション','脚','machine',0],['レッグカール','脚','machine',0],
+  ['ルーマニアンデッドリフト','脚','barbell',0],['ブルガリアンスクワット','脚','dumbbell',1],
+  ['カーフレイズ','脚','machine',0],['ヒップスラスト','脚','barbell',0],
+  ['プランク','体幹','bodyweight',0],['クランチ','体幹','bodyweight',0],
+  ['アブローラー','体幹','bodyweight',0],['レッグレイズ','体幹','bodyweight',0],
+  ['ロシアンツイスト','体幹','bodyweight',0],['ケーブルクランチ','体幹','cable',0],
+].map(([name,part,equip,uni])=>({name,part,equip,uni:!!uni,custom:false}));
+
+/* ===================== DB ===================== */
+let DB=load();
+function load(){
+  try{const d=JSON.parse(localStorage.getItem(KEY));if(d)return migrate(d);}catch(e){}
+  try{const o=JSON.parse(localStorage.getItem('workoutLab_v3'));if(o)return migrate(o);}catch(e){}
+  try{const o=JSON.parse(localStorage.getItem('workoutLab_v2'));if(o)return migrate(o);}catch(e){}
+  return {entries:[],customEx:[],favs:[],archived:[],weekGoal:4,bwLog:[],profile:{},balanceMetric:'sets',balanceMin:10,balanceMax:20,rmFormula:'average'};
+}
+/* 読み込むデータは信頼しない（改ざんされたバックアップJSON対策）。
+   型を強制し、equip/part等は既知の値にホワイトリストで丸める。 */
+function migrate(d){
+  const str=v=>v==null?'':String(v);
+  const num=v=>{const n=Number(v);return isFinite(n)?n:0;};
+  const dateOk=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
+  const arr=v=>Array.isArray(v)?v:[];
+  d=d&&typeof d==='object'?d:{};
+  const out={};
+  out.entries=arr(d.entries).filter(e=>e&&dateOk(str(e.date))).map(e=>({
+    id:str(e.id)||Date.now()+''+Math.random().toString(36).slice(2,5),
+    date:str(e.date),exName:str(e.exName),
+    part:BODYPARTS.includes(e.part)?e.part:'体幹',
+    equip:EQUIPS[e.equip]?e.equip:'other',
+    uni:!!e.uni,sides:e.sides===1?1:(e.uni?2:1),
+    sets:arr(e.sets).map(s=>s||{}).map(s=>({w:num(s.w),reps:num(s.reps),rpe:(s.rpe==null||s.rpe==='')?null:num(s.rpe)}))
+  }));
+  out.customEx=arr(d.customEx).filter(x=>x&&x.name).map(x=>({
+    name:str(x.name),part:BODYPARTS.includes(x.part)?x.part:'体幹',
+    equip:EQUIPS[x.equip]?x.equip:'other',uni:!!x.uni,custom:true}));
+  out.favs=arr(d.favs).map(str);
+  out.archived=arr(d.archived).map(str);
+  out.weekGoal=Math.max(1,num(d.weekGoal))||4;
+  out.bwLog=arr(d.bwLog).filter(r=>r&&dateOk(str(r.date))&&num(r.kg)>0).map(r=>({date:str(r.date),kg:num(r.kg)}));
+  const p=(d.profile&&typeof d.profile==='object')?d.profile:{};
+  out.profile={goals:arr(p.goals||(p.goal?[p.goal]:[])).map(str),weak:str(p.weak),injury:str(p.injury),days:str(p.days)};
+  out.balanceMetric=d.balanceMetric==='volume'?'volume':'sets';
+  out.balanceMin=num(d.balanceMin)||10;out.balanceMax=num(d.balanceMax)||20;
+  out.rmFormula=['epley','brzycki','average'].includes(d.rmFormula)?d.rmFormula:'average';
+  // 旧: 単一bodyweight → bwLogへ
+  if(d.bodyweight&&!out.bwLog.length&&num(d.bodyweight)>0){out.bwLog=[{date:today(),kg:num(d.bodyweight)}];}
+  return out;
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(DB));}
+function exMap(){const m={};[...BUILTIN,...DB.customEx].forEach(x=>m[x.name]=x);return m;}
+
+/* ===================== util ===================== */
+const $=s=>document.querySelector(s);
+/* XSS対策: innerHTMLに入れるユーザー由来の文字列は必ずこれを通す */
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=d=>{const z=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());};
+const today=()=>fmt(new Date());
+function parseD(s){const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+function weekKey(s){const d=parseD(s);const day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return fmt(d);}
+function est1RM(w,reps){
+  w=Number(w||0);reps=Number(reps||0);
+  if(w<=0||reps<=0)return 0;if(reps===1)return Math.round(w);
+  const epley=w*(1+reps/30);const brz=reps<37?w*36/(37-reps):epley;
+  const f=DB.rmFormula||'average';
+  if(f==='epley')return Math.round(epley);
+  if(f==='brzycki')return Math.round(brz);
+  return Math.round((epley+brz)/2);
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);}
+function jpDate(s){const d=parseD(s);return `${d.getMonth()+1}/${d.getDate()}(${DAYNAMES[d.getDay()]})`;}
+
+/* 日付別の体重を取得（その日以前で最も新しい記録） */
+function getBW(date){
+  if(!DB.bwLog||!DB.bwLog.length)return 0;
+  const sorted=[...DB.bwLog].sort((a,b)=>a.date<b.date?-1:1);
+  let res=null;for(const r of sorted){if(r.date<=date)res=r.kg;}
+  if(res==null)res=sorted[0].kg;return Number(res)||0;
+}
+/* ボリューム計算（bwは日付別体重） */
+function setVolume(equip,w,reps,uni,sides,bw){
+  w=Number(w||0);reps=Number(reps||0);bw=Number(bw||0);
+  const sd=uni?(sides||2):1;
+  if(equip==='bodyweight')return ((bw+w)>0?(bw+w):1)*reps*sd;
+  if(equip==='assist')return (bw>0?Math.max(bw-w,0):1)*reps*sd;
+  const mult=uni?sd:(equip==='dumbbell'?2:1);
+  return w*reps*mult;
+}
+function entryVolume(e){const bw=getBW(e.date);return e.sets.reduce((s,st)=>s+setVolume(e.equip,st.w,st.reps,e.uni,e.sides,bw),0);}
+function unitLabel(eq){return eq==='dumbbell'?'片手kg':eq==='bodyweight'?'加重kg':eq==='assist'?'補助kg':'kg';}
+function setDisp(e,s){
+  const eq=e.equip;let base;
+  if(eq==='bodyweight')base=(s.w>0?`+${s.w}kg×`:'自重×')+s.reps+'回';
+  else if(eq==='dumbbell')base=`片手${s.w}kg×${s.reps}回`;
+  else if(eq==='assist')base=`補助${s.w}kg×${s.reps}回`;
+  else base=`${s.w}kg×${s.reps}回`;
+  if(e.uni)base+=(e.sides===1?'（片側）':'（両側）');
+  return base;
+}
+
+/* ===================== SVG折れ線 ===================== */
+let __gid=0;
+function lineSVG(data,color,opts){
+  opts=opts||{};
+  if(!data||data.length<2)return '<div class="empty">データが2点以上必要です</div>';
+  const W=320,H=opts.h||110,p=12,pb=18;
+  const vals=data.map(d=>d.v);let mn=Math.min(...vals),mx=Math.max(...vals);
+  if(mn===mx){mn-=1;mx+=1;}
+  const rng=mx-mn;
+  const X=i=>p+i*(W-2*p)/(data.length-1);
+  const Y=v=>H-pb-(v-mn)/rng*(H-p-pb);
+  let line='',area='M'+X(0).toFixed(1)+' '+(H-pb)+' ';
+  data.forEach((d,i)=>{const xx=X(i).toFixed(1),yy=Y(d.v).toFixed(1);line+=(i?'L':'M')+xx+' '+yy+' ';area+='L'+xx+' '+yy+' ';});
+  area+='L'+X(data.length-1).toFixed(1)+' '+(H-pb)+' Z';
+  const dots=data.map((d,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(d.v).toFixed(1)}" r="2.3" fill="${color}"/>`).join('');
+  const f=opts.fmt||(v=>Math.round(v).toLocaleString());
+  const idxs=[...new Set([0,Math.floor((data.length-1)/2),data.length-1])];
+  const labels=idxs.map(i=>`<text x="${X(i).toFixed(1)}" y="${H-4}" fill="#64748b" font-size="9" text-anchor="${i===0?'start':i===data.length-1?'end':'middle'}">${data[i].l}</text>`).join('');
+  const gid='ag'+(++__gid);
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity="0.28"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#${gid})"/>
+    <path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+    ${dots}${labels}
+    <text x="${p}" y="11" fill="#64748b" font-size="9">${f(mx)}</text>
+    <text x="${p}" y="${H-pb-2}" fill="#64748b" font-size="9">${f(mn)}</text>
+  </svg>`;
+}
+
+/* ===================== ナビ ===================== */
+function go(pg){
+  ['log','hist','dash'].forEach(p=>$('#page-'+p).classList.toggle('hide',p!==pg));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.pg===pg));
+  if(pg==='hist')renderHist();
+  if(pg==='dash')renderDash();
+  window.scrollTo(0,0);
+}
+
+/* ===================== 日付 ===================== */
+let recDate=today(),calMonth=new Date();
+function refreshDateUI(){
+  const d=parseD(recDate);
+  $('#curDate').innerHTML=`📅 ${d.getFullYear()}年 ${jpDate(recDate)}`;
+  $('#todayLabel').textContent=jpDate(recDate);
+  renderTodayLog();
+}
+function toggleCal(){const c=$('#cal');c.classList.toggle('hide');if(!c.classList.contains('hide')){calMonth=parseD(recDate);renderCal();}}
+function renderCal(){
+  const y=calMonth.getFullYear(),m=calMonth.getMonth();
+  const start=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  const recd=new Set(DB.entries.map(e=>e.date));
+  let h=`<div class="calhd"><button onclick="calNav(-1)">‹</button><span>${y}年${m+1}月</span><button onclick="calNav(1)">›</button></div>`;
+  h+='<div class="calgrid">'+DAYNAMES.map(d=>`<div class="dow">${d}</div>`).join('');
+  for(let i=0;i<start;i++)h+='<div class="day empty"></div>';
+  for(let dd=1;dd<=days;dd++){
+    const ds=fmt(new Date(y,m,dd));const cls=['day'];
+    if(ds===recDate)cls.push('sel');if(ds===today())cls.push('today');
+    h+=`<div class="${cls.join(' ')}" onclick="pickCal('${ds}')">${dd}${recd.has(ds)?'<span class="mk"></span>':''}</div>`;
+  }
+  $('#cal').innerHTML=h+'</div>';
+}
+function calNav(n){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+n,1);renderCal();}
+function pickCal(ds){recDate=ds;refreshDateUI();$('#cal').classList.add('hide');}
+
+/* ===================== ピッカー ===================== */
+let selEx=null,pickCat='all',showArchive=false,curSide=2;
+function openPicker(){$('#pickerScrim').classList.remove('hide');$('#exSearch').value='';pickCat='all';showArchive=false;$('#customForm').classList.add('hide');renderCats();renderPicker();}
+function closePicker(){$('#pickerScrim').classList.add('hide');}
+function renderCats(){$('#pickCats').innerHTML=['all',...BODYPARTS].map(c=>`<span class="chip ${c===pickCat?'on':''}" onclick="setCat('${c}')">${c==='all'?'すべて':c}</span>`).join('');}
+function setCat(c){pickCat=c;renderCats();renderPicker();}
+function toggleArchiveView(){showArchive=!showArchive;$('#archBtn').classList.toggle('on',showArchive);$('#pickTitle').firstChild.textContent=showArchive?'アーカイブ ':'種目を選ぶ ';renderCats();renderPicker();}
+/* 種目名をonclickのJS文字列に埋め込むとXSSになるため、配列インデックスで参照する */
+let __pickItems=[];
+function pickAct(i,act){
+  const x=__pickItems[i];if(!x)return;
+  if(act==='choose')chooseEx(x.name);
+  else if(act==='fav')toggleFav(x.name);
+  else if(act==='arch')setArchive(x.name,true);
+  else if(act==='restore')setArchive(x.name,false);
+}
+function renderPicker(){
+  const q=$('#exSearch').value.trim();const all=[...BUILTIN,...DB.customEx];const arch=new Set(DB.archived);
+  const match=x=>(pickCat==='all'||x.part===pickCat)&&(!q||x.name.includes(q));
+  __pickItems=[];
+  const exrow=x=>{
+    const i=__pickItems.push(x)-1;
+    const fav=DB.favs.includes(x.name),isArch=arch.has(x.name);
+    return `<div class="exrow"><div style="flex:1" onclick="pickAct(${i},'choose')"><div class="nm">${esc(x.name)}</div>
+        <div class="meta">${esc(x.part)}・${esc(EQUIPS[x.equip]||'')}${x.uni?'・片側ずつ':''}${x.custom?'・自作':''}</div></div>
+      ${isArch?`<span class="ico" onclick="pickAct(${i},'restore')" title="復元">↩</span>`
+        :`<span class="ico ${fav?'on':''}" onclick="pickAct(${i},'fav')">${fav?'★':'☆'}</span>
+          <span class="ico" onclick="pickAct(${i},'arch')" title="アーカイブ">🗄</span>`}</div>`;
+  };
+  if(showArchive){const list=all.filter(x=>arch.has(x.name)&&match(x));
+    $('#pickList').innerHTML='<div class="seclbl">アーカイブ済み</div>'+(list.length?list.map(exrow).join(''):'<div class="empty">アーカイブはありません</div>');return;}
+  let html='';
+  if(!q){
+    const fav=all.filter(x=>DB.favs.includes(x.name)&&!arch.has(x.name)&&match(x));
+    if(fav.length)html+='<div class="seclbl">★ お気に入り</div>'+fav.map(exrow).join('');
+    const recent=[...new Set(DB.entries.slice().reverse().map(e=>e.exName))].slice(0,6)
+      .map(n=>all.find(x=>x.name===n)).filter(x=>x&&!arch.has(x.name)&&!DB.favs.includes(x.name)&&match(x));
+    if(recent.length)html+='<div class="seclbl">最近使った</div>'+recent.map(exrow).join('');
+  }
+  const rest=all.filter(x=>!arch.has(x.name)&&match(x));
+  html+='<div class="seclbl">'+(q?'検索結果':'すべて')+'</div>'+(rest.length?rest.map(exrow).join(''):'<div class="empty">該当なし</div>');
+  $('#pickList').innerHTML=html;
+}
+function toggleFav(n){const i=DB.favs.indexOf(n);if(i<0)DB.favs.push(n);else DB.favs.splice(i,1);save();renderPicker();}
+function setArchive(n,on){const i=DB.archived.indexOf(n);if(on&&i<0)DB.archived.push(n);if(!on&&i>=0)DB.archived.splice(i,1);save();renderPicker();toast(on?'アーカイブしました':'復元しました');}
+function chooseEx(n){selEx=exMap()[n];curSide=2;closePicker();renderSelEx();}
+function renderSelEx(){
+  if(!selEx){$('#selExName').textContent='種目を選ぶ';$('#selExMeta').textContent='タップしてライブラリから選択';$('#setsArea').classList.add('hide');return;}
+  $('#selExName').textContent=selEx.name;
+  $('#selExMeta').innerHTML=`<span class="eqtag">${esc(selEx.part)}</span> <span class="eqtag">${esc(EQUIPS[selEx.equip]||'')}</span>${selEx.uni?' <span class="eqtag">片側ずつ</span>':''}`;
+  $('#setsArea').classList.remove('hide');
+  $('#sideSel').classList.toggle('hide',!selEx.uni);
+  if(selEx.uni)setSide(2);
+  $('#setsLabel').textContent=`セット（${unitLabel(selEx.equip)} × 回数 / RPE）`;
+  showLastHint();if(!setsState.length)setsState=[{w:'',reps:'',rpe:''}];renderSets();
+}
+function setSide(n){curSide=n;$('#sideBoth').classList.toggle('on',n===2);$('#sideOne').classList.toggle('on',n===1);}
+function toggleCustom(){$('#customForm').classList.toggle('hide');
+  $('#cPart').innerHTML=BODYPARTS.map(b=>`<option>${b}</option>`).join('');
+  $('#cEquip').innerHTML=Object.entries(EQUIPS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');}
+function addCustom(){
+  const name=$('#cName').value.trim();if(!name){toast('名前を入力');return;}
+  DB.customEx.push({name,part:$('#cPart').value,equip:$('#cEquip').value,uni:$('#cUni').checked,custom:true});
+  save();$('#cName').value='';$('#cUni').checked=false;chooseEx(name);
+}
+
+/* ===================== セット入力 ===================== */
+let setsState=[{w:'',reps:'',rpe:''}];
+function renderSets(){
+  const eq=selEx?selEx.equip:'barbell';
+  $('#sets').innerHTML=setsState.map((s,i)=>`
+    <div class="setrow"><span class="n">${i+1}</span>
+      <div class="field"><small>${unitLabel(eq)}</small><input type="number" inputmode="decimal" placeholder="${eq==='bodyweight'?'0':'kg'}" value="${esc(s.w)}" onchange="setVal(${i},'w',this.value)"></div>
+      <div class="field"><small>回数</small><input type="number" inputmode="numeric" placeholder="回" value="${esc(s.reps)}" onchange="setVal(${i},'reps',this.value)"></div>
+      <div class="field"><small>RPE</small><input type="number" inputmode="decimal" placeholder="任意" value="${esc(s.rpe)}" onchange="setVal(${i},'rpe',this.value)"></div>
+      <button class="del" onclick="rmSet(${i})">×</button></div>`).join('');
+}
+function setVal(i,k,v){setsState[i][k]=v;}
+function addSet(){const l=setsState[setsState.length-1]||{};setsState.push({w:l.w||'',reps:l.reps||'',rpe:''});renderSets();}
+function rmSet(i){setsState.splice(i,1);if(!setsState.length)setsState=[{w:'',reps:'',rpe:''}];renderSets();}
+function showLastHint(){
+  if(!selEx){$('#lastHint').textContent='';return;}
+  const past=DB.entries.filter(e=>e.exName===selEx.name).sort((a,b)=>a.date<b.date?1:-1);
+  if(!past.length){$('#lastHint').innerHTML='<span class="muted">前回の記録なし — 新しい種目です</span>';return;}
+  const p=past[0];$('#lastHint').innerHTML=`<span class="sub">前回 ${jpDate(p.date)}: </span>`+esc(p.sets.map(s=>setDisp(p,s)).join(' / '));
+}
+function saveEntry(){
+  if(!selEx){toast('種目を選んでください');return;}
+  const sets=setsState.filter(s=>s.reps!=='').map(s=>({w:Number(s.w||0),reps:Number(s.reps||0),rpe:s.rpe?Number(s.rpe):null}));
+  if(!sets.length){toast('セットを入力してください');return;}
+  DB.entries.push({id:Date.now()+''+Math.random().toString(36).slice(2,5),date:recDate,
+    exName:selEx.name,part:selEx.part,equip:selEx.equip,uni:selEx.uni,sides:selEx.uni?curSide:1,sets});
+  save();setsState=[{w:'',reps:'',rpe:''}];selEx=null;renderSelEx();renderTodayLog();updateStreak();toast('✓ 保存しました');
+}
+function renderTodayLog(){const list=DB.entries.filter(e=>e.date===recDate);
+  $('#todayLog').innerHTML=list.length?list.map(logCard).join(''):'<div class="empty">まだ記録がありません</div>';}
+function logCard(e){
+  const sets=e.sets.map(s=>setDisp(e,s)+(s.rpe?` @${s.rpe}`:'')).join('  /  ');
+  return `<div class="logrec" data-id="${esc(e.id)}" onclick="openEdit(this.dataset.id)">
+    <div style="display:flex;align-items:center"><span class="ex">${esc(e.exName)}</span>
+    <span class="dt" style="margin-left:auto">${esc(e.part)}・${Math.round(entryVolume(e)).toLocaleString()}vol ▸</span></div>
+    <div class="sub" style="font-size:13px">${esc(sets)}</div></div>`;
+}
+
+/* ===================== 編集 ===================== */
+let editId=null,editSetsState=[],editSide=2;
+function openEdit(id){
+  const e=DB.entries.find(x=>x.id===id);if(!e)return;
+  editId=id;editSetsState=e.sets.map(s=>({w:s.w,reps:s.reps,rpe:s.rpe||''}));editSide=e.sides||2;
+  $('#editTitle').firstChild.textContent=e.exName+' を編集 ';$('#editDate').value=e.date;
+  $('#editScrim').dataset.equip=e.equip;
+  $('#editSideSel').classList.toggle('hide',!e.uni);if(e.uni)setEditSide(editSide);
+  $('#editSetsLabel').textContent=`セット（${unitLabel(e.equip)} × 回数 / RPE）`;
+  renderEditSets();$('#editScrim').classList.remove('hide');
+}
+function setEditSide(n){editSide=n;$('#eSideBoth').classList.toggle('on',n===2);$('#eSideOne').classList.toggle('on',n===1);}
+function closeEdit(){$('#editScrim').classList.add('hide');editId=null;}
+function renderEditSets(){
+  const eq=$('#editScrim').dataset.equip;
+  $('#editSets').innerHTML=editSetsState.map((s,i)=>`
+    <div class="setrow"><span class="n">${i+1}</span>
+      <div class="field"><small>${unitLabel(eq)}</small><input type="number" value="${esc(s.w)}" onchange="editVal(${i},'w',this.value)"></div>
+      <div class="field"><small>回数</small><input type="number" value="${esc(s.reps)}" onchange="editVal(${i},'reps',this.value)"></div>
+      <div class="field"><small>RPE</small><input type="number" value="${esc(s.rpe)}" onchange="editVal(${i},'rpe',this.value)"></div>
+      <button class="del" onclick="editRm(${i})">×</button></div>`).join('');
+}
+function editVal(i,k,v){editSetsState[i][k]=v;}
+function editAddSet(){const l=editSetsState[editSetsState.length-1]||{};editSetsState.push({w:l.w||'',reps:l.reps||'',rpe:''});renderEditSets();}
+function editRm(i){editSetsState.splice(i,1);renderEditSets();}
+function editSave(){
+  const e=DB.entries.find(x=>x.id===editId);if(!e)return;
+  const sets=editSetsState.filter(s=>s.reps!=='').map(s=>({w:Number(s.w||0),reps:Number(s.reps||0),rpe:s.rpe?Number(s.rpe):null}));
+  if(!sets.length){toast('セットがありません');return;}
+  e.sets=sets;e.date=$('#editDate').value||e.date;if(e.uni)e.sides=editSide;
+  save();closeEdit();renderTodayLog();renderHist();updateStreak();toast('✓ 更新しました');
+}
+function editDelete(){if(!confirm('この記録を削除しますか？'))return;
+  DB.entries=DB.entries.filter(x=>x.id!==editId);save();closeEdit();renderTodayLog();renderHist();updateStreak();toast('削除しました');}
+
+/* ===================== 履歴 ===================== */
+function renderHist(){
+  if(!DB.entries.length){$('#histList').innerHTML='<div class="empty">記録がありません</div>';return;}
+  const byDate={};DB.entries.forEach(e=>{(byDate[e.date]=byDate[e.date]||[]).push(e);});
+  $('#histList').innerHTML=Object.keys(byDate).sort((a,b)=>a<b?1:-1).map(d=>{
+    const vol=byDate[d].reduce((s,e)=>s+entryVolume(e),0);
+    return `<div class="seclbl" style="font-size:13px;color:var(--acc);margin-top:14px">${jpDate(d)} <span style="color:var(--mut);font-weight:500">・${Math.round(vol).toLocaleString()}vol</span></div>`+byDate[d].map(logCard).join('');
+  }).join('');
+}
+
+/* ===================== ストリーク（週目標の連続達成） ===================== */
+function trainDays(){return[...new Set(DB.entries.map(e=>e.date))].sort();}
+function weekTrainDays(wk){return new Set(DB.entries.filter(e=>weekKey(e.date)===wk).map(e=>e.date)).size;}
+/* 週目標を達成した週が何週連続で続いているか。
+   今週はまだ途中でも達成済みならカウント、未達成でもストリークは切らない（先週から遡って数える）。 */
+function calcStreak(){
+  const goal=DB.weekGoal||4;
+  const d=parseD(weekKey(today()));let s=0;
+  if(weekTrainDays(fmt(d))>=goal)s++;
+  d.setDate(d.getDate()-7);
+  while(weekTrainDays(fmt(d))>=goal){s++;d.setDate(d.getDate()-7);}
+  return s;
+}
+function updateStreak(){$('#streakNum').textContent=calcStreak();}
+
+/* ===================== 設定 ===================== */
+function renderSettings(){
+  $('#wgInput').value=DB.weekGoal;
+  const m=DB.balanceMetric||'sets';
+  $('#bmSets').classList.toggle('on',m==='sets');$('#bmVol').classList.toggle('on',m==='volume');
+  $('#balRangeWrap').classList.toggle('hide',m==='volume');
+  $('#balMin').value=DB.balanceMin;$('#balMax').value=DB.balanceMax;
+  $('#rmFormula').value=DB.rmFormula||'average';
+}
+function setWeekGoal(v){DB.weekGoal=Math.max(1,Number(v)||4);save();renderDash();}
+function setBalanceMetric(m){DB.balanceMetric=m;save();renderDash();}
+function setBalanceRange(){DB.balanceMin=Number($('#balMin').value)||10;DB.balanceMax=Number($('#balMax').value)||20;save();renderDash();}
+function setRMFormula(v){DB.rmFormula=v;save();renderDash();}
+
+/* ===================== 分析 ===================== */
+let volMode='week';
+function setVolMode(m){volMode=m;['week','month','custom'].forEach(x=>$('#pm'+x[0].toUpperCase()+x.slice(1)).classList.toggle('on',x===m));
+  $('#customRange').classList.toggle('hide',m!=='custom');
+  if(m==='custom'){if(!$('#rangeTo').value)$('#rangeTo').value=today();if(!$('#rangeFrom').value){const f=new Date();f.setDate(f.getDate()-56);$('#rangeFrom').value=fmt(f);}}
+  renderVolBars();}
+function renderDash(){
+  const streak=calcStreak();
+  $('#streakBig').innerHTML=streak+'<span style="font-size:14px"> 週</span>';
+  $('#totSess').textContent=trainDays().length;$('#streakNum').textContent=streak;
+  const wk=weekKey(today());
+  const twd=new Set(DB.entries.filter(e=>weekKey(e.date)===wk).map(e=>e.date)).size,goal=DB.weekGoal||4;
+  $('#weekDays').textContent=twd+'/'+goal;
+  $('#weekRing').setAttribute('stroke-dashoffset',264*(1-Math.min(twd/goal,1)));
+  $('#habitMsg').textContent=twd>=goal?'今週の目標達成！素晴らしい💪':`今週あと${goal-twd}回で目標達成`;
+  renderSettings();renderBadges(streak);renderActCal();renderVolBars();renderBalance();
+  fillExDetailSel();renderExDetail();renderRPE();renderFreq();renderBW();
+}
+function renderBadges(streak){
+  const tot=trainDays().length,totVol=DB.entries.reduce((s,e)=>s+entryVolume(e),0);
+  const defs=[{ic:'🌱',nm:'初記録',got:tot>=1},{ic:'🔥',nm:'3週連続達成',got:streak>=3},
+    {ic:'⚡',nm:'8週連続達成',got:streak>=8},{ic:'🏅',nm:'10回達成',got:tot>=10},
+    {ic:'💎',nm:'30回達成',got:tot>=30},{ic:'🏔️',nm:'10万vol',got:totVol>=100000}];
+  $('#badges').innerHTML=defs.map(b=>`<div class="badge ${b.got?'got':''}"><div class="ic">${b.got?b.ic:'🔒'}</div><div class="nm">${b.nm}</div></div>`).join('');
+}
+function dailyVolMap(){const m={};DB.entries.forEach(e=>{m[e.date]=(m[e.date]||0)+entryVolume(e);});return m;}
+/* 活動カレンダー（月表示・トレした日を塗る） */
+let actMonth=new Date();
+function actNav(n){actMonth=new Date(actMonth.getFullYear(),actMonth.getMonth()+n,1);renderActCal();}
+function renderActCal(){
+  const dv=dailyVolMap();
+  const y=actMonth.getFullYear(),m=actMonth.getMonth();
+  const start=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  let cnt=0;
+  let h=`<div class="calhd"><button onclick="actNav(-1)">‹</button><span>${y}年${m+1}月</span><button onclick="actNav(1)">›</button></div>`;
+  h+='<div class="calgrid">'+DAYNAMES.map(d=>`<div class="dow">${d}</div>`).join('');
+  for(let i=0;i<start;i++)h+='<div class="day empty"></div>';
+  for(let dd=1;dd<=days;dd++){
+    const ds=fmt(new Date(y,m,dd));const v=dv[ds]||0;if(v)cnt++;
+    const cls=['day'];if(v)cls.push('did');if(ds===today())cls.push('today');
+    h+=`<div class="${cls.join(' ')}" title="${v?jpDate(ds)+' '+Math.round(v).toLocaleString()+'vol':''}">${dd}</div>`;
+  }
+  $('#actCal').innerHTML=h+'</div>';
+  $('#actCalLbl').textContent=`${m+1}月は ${cnt}日 トレーニング`;
+}
+function renderVolBars(){
+  let buckets=[];
+  if(volMode==='week'){
+    const mon=parseD(weekKey(today()));
+    for(let i=7;i>=0;i--){const d=new Date(mon);d.setDate(d.getDate()-i*7);const k=fmt(d);
+      buckets.push({label:(d.getMonth()+1)+'/'+d.getDate(),now:i===0,test:e=>weekKey(e.date)===k});}
+  }else if(volMode==='month'){
+    const now=new Date();
+    for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const k=fmt(d).slice(0,7);
+      buckets.push({label:(d.getMonth()+1)+'月',now:i===0,test:e=>e.date.slice(0,7)===k});}
+  }else{
+    const from=$('#rangeFrom').value,to=$('#rangeTo').value;
+    if(!from||!to){$('#volBars').innerHTML='';$('#volNote').textContent='期間を選択してください';return;}
+    let s=parseD(weekKey(from)),e2=parseD(to),i=0;
+    while(s<=e2&&i<60){const k=fmt(s);buckets.push({label:(s.getMonth()+1)+'/'+s.getDate(),now:false,
+      test:e=>weekKey(e.date)===k&&e.date>=from&&e.date<=to});s=new Date(s);s.setDate(s.getDate()+7);i++;}
+  }
+  const vols=buckets.map(b=>DB.entries.filter(b.test).reduce((s,e)=>s+entryVolume(e),0));
+  const max=Math.max(...vols,1);
+  $('#volBars').innerHTML=buckets.map((b,i)=>`<div class="bar ${b.now?'today':''}"><div class="fill" style="height:${Math.round(vols[i]/max*100)}%"></div><div class="bl">${b.label}</div></div>`).join('');
+  const tot=vols.reduce((a,b)=>a+b,0),last=vols[vols.length-1],prev=vols[vols.length-2];
+  let note=`合計 ${Math.round(tot).toLocaleString()} vol`;
+  if(last&&prev){const ch=Math.round((last-prev)/prev*100);note+=` ／ 直近 ${ch>=0?'+':''}${ch}%`;}
+  $('#volNote').textContent=note;
+}
+const COLORS={'胸':'#f97316','背中':'#8b5cf6','肩':'#0891b2','腕':'#16a34a','脚':'#ca8a04','体幹':'#e11d48'};
+function renderBalance(){
+  const wk=weekKey(today());const metric=DB.balanceMetric||'sets';const data={};
+  DB.entries.filter(e=>weekKey(e.date)===wk).forEach(e=>{data[e.part]=(data[e.part]||0)+(metric==='volume'?entryVolume(e):e.sets.length);});
+  const total=Object.values(data).reduce((a,b)=>a+b,0);
+  if(!total){$('#balance').innerHTML='<div class="empty">今週のデータがありません</div>';return;}
+  const mn=DB.balanceMin||10,mx=DB.balanceMax||20,unit=metric==='volume'?'vol':'セット';
+  let h='<div style="margin-bottom:10px">';
+  BODYPARTS.forEach(p=>{const n=data[p]||0,pct=Math.round(n/total*100);
+    let st='';if(metric==='sets')st=n===0?'':(n<mn?'<span style="color:var(--warn)"> 不足</span>':(n>mx?'<span style="color:var(--bad)"> 過多</span>':'<span style="color:var(--ok)"> 適正</span>'));
+    const val=metric==='volume'?Math.round(n).toLocaleString():n;
+    h+=`<div class="legrow"><span class="sw" style="background:${COLORS[p]||'#888'}"></span>${p} <span class="pct">${val}${unit} (${pct}%)${st}</span></div>`;});
+  h+='</div><div style="display:flex;height:14px;border-radius:7px;overflow:hidden;border:1px solid var(--line)">';
+  BODYPARTS.forEach(p=>{const n=data[p]||0;if(n)h+=`<div style="width:${n/total*100}%;background:${COLORS[p]||'#888'}"></div>`;});
+  h+='</div>'+(metric==='sets'?`<p class="muted" style="margin-top:8px">目安：1部位あたり週${mn}〜${mx}セット</p>`:'<p class="muted" style="margin-top:8px">部位別の総ボリューム比率を表示しています</p>');
+  $('#balance').innerHTML=h;
+}
+/* 種目別詳細 */
+function fillExDetailSel(){
+  const byEx={};DB.entries.forEach(e=>{byEx[e.exName]=(byEx[e.exName]||0)+1;});
+  const names=Object.keys(byEx).sort((a,b)=>byEx[b]-byEx[a]);
+  const sel=$('#exDetailSel');const prev=sel.value;
+  sel.innerHTML=names.length?names.map(n=>`<option value="${esc(n)}">${esc(n)}（${byEx[n]}回）</option>`).join(''):'<option>記録なし</option>';
+  if(names.includes(prev))sel.value=prev;
+}
+function renderExDetail(){
+  const name=$('#exDetailSel').value;
+  const arr=DB.entries.filter(e=>e.exName===name).sort((a,b)=>a.date<b.date?-1:1);
+  if(arr.length<1){$('#exDetail').innerHTML='<div class="empty">記録がありません</div>';return;}
+  const eq=arr[0].equip;
+  const oneRMpts=arr.map(e=>({l:`${parseD(e.date).getMonth()+1}/${parseD(e.date).getDate()}`,v:Math.max(...e.sets.map(s=>est1RM(eq==='bodyweight'?0:s.w,s.reps)))}));
+  const volPts=arr.map(e=>({l:`${parseD(e.date).getMonth()+1}/${parseD(e.date).getDate()}`,v:Math.round(entryVolume(e))}));
+  // ベスト記録
+  let best={w:0,reps:0,e1:0};
+  arr.forEach(e=>e.sets.forEach(s=>{const r=est1RM(s.w,s.reps);if(r>best.e1)best={w:s.w,reps:s.reps,e1:r};}));
+  let html='';
+  if(eq!=='bodyweight'&&eq!=='assist'){
+    html+=`<div class="chartlbl"><span>推定1RM 推移</span><span>最新 ${oneRMpts[oneRMpts.length-1].v}kg</span></div>`;
+    html+=lineSVG(oneRMpts,'#f97316',{fmt:v=>Math.round(v)+'kg'});
+    html+=`<div class="muted" style="margin-top:4px">ベスト: ${best.w}kg×${best.reps}回（推定1RM ${best.e1}kg）</div>`;
+  }
+  html+=`<div class="chartlbl" style="margin-top:14px"><span>ボリューム 推移</span><span>最新 ${volPts[volPts.length-1].v.toLocaleString()}</span></div>`;
+  html+=lineSVG(volPts,'#16a34a');
+  $('#exDetail').innerHTML=html;
+}
+/* RPE推移 */
+function renderRPE(){
+  const mon=parseD(weekKey(today()));const pts=[];
+  for(let i=9;i>=0;i--){const d=new Date(mon);d.setDate(d.getDate()-i*7);const k=fmt(d);
+    const rpes=[];DB.entries.filter(e=>weekKey(e.date)===k).forEach(e=>e.sets.forEach(s=>{if(s.rpe)rpes.push(s.rpe);}));
+    if(rpes.length)pts.push({l:(d.getMonth()+1)+'/'+d.getDate(),v:rpes.reduce((a,b)=>a+b,0)/rpes.length});
+  }
+  $('#rpeChart').innerHTML=pts.length>=2?lineSVG(pts,'#d97706',{fmt:v=>v.toFixed(1)}):'<div class="empty">RPEを入力した週が2週以上で表示されます</div>';
+}
+/* 頻度 */
+function renderFreq(){
+  const mon=parseD(weekKey(today()));const weeks=[];
+  for(let i=7;i>=0;i--){const d=new Date(mon);d.setDate(d.getDate()-i*7);weeks.push(fmt(d));}
+  const counts=weeks.map(k=>new Set(DB.entries.filter(e=>weekKey(e.date)===k).map(e=>e.date)).size);
+  const max=Math.max(...counts,1);
+  $('#freqBars').innerHTML=weeks.map((k,i)=>{const d=parseD(k);
+    return `<div class="bar ${i===weeks.length-1?'today':''}"><div class="fill" style="height:${Math.round(counts[i]/max*100)}%"></div><div class="bl">${d.getMonth()+1}/${d.getDate()}</div></div>`;}).join('');
+  const last4=counts.slice(-4);const avg=last4.reduce((a,b)=>a+b,0)/(last4.length||1);
+  $('#freqAvg').innerHTML=avg.toFixed(1)+'<span style="font-size:13px"> 回/週</span>';
+  $('#freqNow').innerHTML=counts[counts.length-1]+'<span style="font-size:13px"> 回</span>';
+}
+/* 体重 */
+function addBW(){
+  const date=$('#bwDate').value||today();const kg=Number($('#bwVal').value);
+  if(!kg){toast('体重を入力してください');return;}
+  const ex=DB.bwLog.find(r=>r.date===date);if(ex)ex.kg=kg;else DB.bwLog.push({date,kg});
+  save();$('#bwVal').value='';renderBW();renderVolBars();toast('体重を記録しました');
+}
+function renderBW(){
+  $('#bwDate').value=$('#bwDate').value||today();
+  const log=[...DB.bwLog].sort((a,b)=>a.date<b.date?-1:1);
+  if(log.length<1){$('#bwChart').innerHTML='<div class="empty">体重を記録すると推移が表示されます</div>';$('#bwList').innerHTML='';return;}
+  const pts=log.map(r=>({l:(parseD(r.date).getMonth()+1)+'/'+parseD(r.date).getDate(),v:r.kg}));
+  $('#bwChart').innerHTML=log.length>=2?lineSVG(pts,'#0891b2',{fmt:v=>v.toFixed(1)+'kg'}):`<div class="muted">記録: ${log[0].kg}kg（${jpDate(log[0].date)}）</div>`;
+  const recent=log.slice(-4).reverse();
+  $('#bwList').innerHTML=recent.map(r=>`<div class="legrow"><span class="sub" style="width:90px">${jpDate(r.date)}</span> <b>${esc(r.kg)}kg</b> <span class="del" style="margin-left:auto;width:auto" data-d="${esc(r.date)}" onclick="rmBW(this.dataset.d)">削除</span></div>`).join('');
+}
+function rmBW(date){DB.bwLog=DB.bwLog.filter(r=>r.date!==date);save();renderBW();renderVolBars();toast('削除しました');}
+
+/* ===================== AIエクスポート（設定式） ===================== */
+let exNames=[],exSel={};
+function loadProfile(){const p=DB.profile||{};
+  const goals=p.goals||(p.goal?[p.goal]:['筋肥大']);
+  document.querySelectorAll('.goalchk').forEach(c=>c.checked=goals.includes(c.value));
+  $('#pWeak').value=p.weak||'';$('#pInjury').value=p.injury||'';$('#pDays').value=p.days||'';}
+function readGoals(){return [...document.querySelectorAll('.goalchk')].filter(c=>c.checked).map(c=>c.value);}
+function saveProfile(){DB.profile={goals:readGoals(),weak:$('#pWeak').value.trim(),injury:$('#pInjury').value.trim(),days:$('#pDays').value};save();}
+function openExportSheet(){if(!DB.entries.length){toast('記録がありません');return;}loadProfile();exSel={};$('#pCustomRange').classList.add('hide');renderExportExList();$('#exportScrim').classList.remove('hide');}
+function closeExport(){$('#exportScrim').classList.add('hide');}
+function exExAll(on){exNames.forEach(n=>exSel[n]=on);renderExportExList();}
+function exPeriodRange(){
+  const v=$('#pPeriod').value;
+  $('#pCustomRange').classList.toggle('hide',v!=='custom');
+  if(v==='custom'){
+    if(!$('#pTo').value)$('#pTo').value=today();
+    if(!$('#pFrom').value){const f=new Date();f.setDate(f.getDate()-56);$('#pFrom').value=fmt(f);}
+    return {from:$('#pFrom').value||null,to:$('#pTo').value||today()};
+  }
+  const days=Number(v||0);
+  return {from:days?fmt(new Date(Date.now()-days*864e5)):null,to:today()};
+}
+function inRangeFn(r){return e=>(!r.from||e.date>=r.from)&&(!r.to||e.date<=r.to);}
+function renderExportExList(){
+  const r=exPeriodRange();const inR=inRangeFn(r);const counts={};
+  DB.entries.filter(inR).forEach(e=>{counts[e.exName]=(counts[e.exName]||0)+1;});
+  exNames=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]);
+  exNames.forEach(n=>{if(exSel[n]===undefined)exSel[n]=true;});
+  $('#pExList').innerHTML=exNames.length?exNames.map((n,i)=>`<label class="check"><input type="checkbox" ${exSel[n]?'checked':''} onchange="exSel[exNames[${i}]]=this.checked"> ${esc(n)}（${counts[n]}回）</label>`).join(''):'<div class="empty">この期間に記録がありません</div>';
+}
+function observations(ents,targets){
+  const out=[];
+  targets.forEach(n=>{
+    const arr=ents.filter(e=>e.exName===n&&e.equip!=='bodyweight'&&e.equip!=='assist').sort((a,b)=>a.date<b.date?-1:1);
+    if(arr.length>=3){
+      const m=arr.map(e=>Math.max(...e.sets.map(s=>est1RM(s.w,s.reps))));
+      const recent=Math.max(m[m.length-1],m[m.length-2]),earlier=Math.max(...m.slice(0,m.length-2));
+      if(recent<=earlier)out.push(`【停滞】${n}：直近2回で推定1RMが更新なし（現在 ${m[m.length-1]}kg）。重量維持で回数を積むか、軽いディロード後に再挑戦を。`);
+    }
+  });
+  const wk=weekKey(today());const bp={};const partsSeen=new Set(DB.entries.map(e=>e.part));
+  DB.entries.filter(e=>weekKey(e.date)===wk).forEach(e=>{bp[e.part]=(bp[e.part]||0)+e.sets.length;});
+  const bmn=DB.balanceMin||10,bmx=DB.balanceMax||20;
+  partsSeen.forEach(pt=>{const n=bp[pt]||0;
+    if(n<bmn)out.push(`【ボリューム不足】${pt}：今週${n}セット（目安 週${bmn}〜${bmx}）。あと約${bmn-n}セット追加を推奨。`);
+    else if(n>bmx)out.push(`【ボリューム過多】${pt}：今週${n}セット。回復が追いつくか注意。`);});
+  const mon=parseD(weekKey(today()));const recentRpe=[];
+  for(let i=0;i<2;i++){const d=new Date(mon);d.setDate(d.getDate()-i*7);const k=fmt(d);
+    DB.entries.filter(e=>weekKey(e.date)===k).forEach(e=>e.sets.forEach(s=>{if(s.rpe)recentRpe.push(s.rpe);}));}
+  if(recentRpe.length>=3){const avg=recentRpe.reduce((a,b)=>a+b,0)/recentRpe.length;
+    if(avg>=9)out.push(`【疲労の兆候】直近2週の平均RPEが${avg.toFixed(1)}と高め。ディロード週の検討を。`);}
+  const cnt=k=>new Set(DB.entries.filter(e=>weekKey(e.date)===k).map(e=>e.date)).size;
+  const tw=cnt(fmt(mon));const prev=[];for(let i=1;i<=3;i++){const d=new Date(mon);d.setDate(d.getDate()-i*7);prev.push(cnt(fmt(d)));}
+  const avgPrev=prev.reduce((a,b)=>a+b,0)/3;
+  if(avgPrev>0&&tw<avgPrev-0.5)out.push(`【頻度低下】今週${tw}回（平常 約${avgPrev.toFixed(1)}回/週）。ペースが落ち気味。`);
+  if(DB.bwLog.length>=2){const s=[...DB.bwLog].sort((a,b)=>a.date<b.date?-1:1);
+    const last=s[s.length-1],ago=fmt(new Date(Date.now()-28*864e5));let base=s[0];
+    for(const r of s){if(r.date<=ago)base=r;}
+    const dlt=last.kg-base.kg;
+    if(Math.abs(dlt)>=0.3)out.push(`【体重】約4週で ${dlt>=0?'+':''}${dlt.toFixed(1)}kg（${base.kg}→${last.kg}kg）。`);}
+  return out;
+}
+function buildExport(){
+  saveProfile();const p=DB.profile;
+  const r=exPeriodRange();const inR=inRangeFn(r);const ents=DB.entries.filter(inR);
+  if(!ents.length){toast('対象期間にデータがありません');return;}
+  const targets=exNames.filter(n=>exSel[n]);
+  const periodLabel=r.from?`${r.from} 〜 ${r.to}`:`全期間（〜${r.to}）`;
+  const notes=observations(ents,targets);
+  const wkVol={};ents.forEach(e=>{const k=weekKey(e.date);wkVol[k]=(wkVol[k]||0)+entryVolume(e);});
+  const wkVolArr=Object.keys(wkVol).sort().slice(-12).map(k=>`- ${k}: ${Math.round(wkVol[k]).toLocaleString()}vol`);
+  const wkRpe={};ents.forEach(e=>{const k=weekKey(e.date);e.sets.forEach(s=>{if(s.rpe){(wkRpe[k]=wkRpe[k]||[]).push(s.rpe);}});});
+  const wkRpeArr=Object.keys(wkRpe).sort().slice(-12).map(k=>{const a=wkRpe[k];return `- ${k}: 平均RPE ${(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1)}`;});
+  const wkDays={};ents.forEach(e=>{const k=weekKey(e.date);(wkDays[k]=wkDays[k]||new Set()).add(e.date);});
+  const wkDaysArr=Object.keys(wkDays).sort().slice(-12).map(k=>`- ${k}: ${wkDays[k].size}回`);
+  const bwArr=[...DB.bwLog].sort((a,b)=>a.date<b.date?-1:1).filter(inR).slice(-12).map(x=>`- ${x.date}: ${x.kg}kg`);
+  let exBlocks='';
+  targets.forEach(n=>{
+    const arr=ents.filter(e=>e.exName===n).sort((a,b)=>a.date<b.date?-1:1);if(!arr.length)return;
+    const eq=arr[0].equip;
+    exBlocks+=`\n### ${n}（${arr[0].part}/${EQUIPS[eq]}${arr[0].uni?'・片側ずつ':''}）\n`;
+    arr.slice(-10).forEach(e=>{
+      const oneRM=(eq!=='bodyweight'&&eq!=='assist')?` 推定1RM ${Math.max(...e.sets.map(s=>est1RM(s.w,s.reps)))}kg /`:'';
+      exBlocks+=`- ${e.date}:${oneRM} ${Math.round(entryVolume(e)).toLocaleString()}vol ｜ `+e.sets.map(s=>setDisp(e,s)+(s.rpe?`@RPE${s.rpe}`:'')).join(', ')+`\n`;
+    });
+  });
+  const bwSorted=[...DB.bwLog].sort((a,b)=>a.date<b.date?-1:1);
+  const lastBW=bwSorted.length?bwSorted[bwSorted.length-1]:null;
+  const bwStale=lastBW?Math.round((Date.now()-parseD(lastBW.date).getTime())/864e5):null;
+  const bwLine=lastBW?`${lastBW.kg}kg（最終記録: ${lastBW.date}${bwStale>=14?` / ${bwStale}日前のため最新でない可能性あり`:''}）`:'未登録';
+  const md=`# 筋トレ記録 — AIコーチング依頼
+
+あなたは筋トレの専門コーチです。まずは以下のデータと私の状況を読み解き、
+現状の評価（良い点・課題・気づいた傾向）を分かりやすく教えてください。
+そのうえで、メニューや今後の方針は一気に決めず、私と対話しながら一緒に詰めていきたいです。
+最後に「ここをもう少し聞きたい」という確認質問を2〜3個添えてくれると助かります。
+（筋トレ科学＝漸進性過負荷・週間10〜20セット/部位・適切な頻度・十分な回復、を前提に）
+
+## 私の状況
+- 目標: ${(p.goals&&p.goals.length)?p.goals.join('、'):'未設定'}
+- 弱点・伸ばしたい部位: ${p.weak||'特になし'}
+- ケガ・制限: ${p.injury||'特になし'}
+- 週のトレ可能日数: ${p.days||'未記入'}
+- 体重: ${bwLine}
+
+## 基本情報
+- 出力期間: ${periodLabel}
+- 総セッション(全期間): ${trainDays().length} ／ 週目標の連続達成: ${calcStreak()}週 ／ 週目標: ${DB.weekGoal}回
+- ボリューム定義: バーベル/マシン=重量×回数、ダンベル=片手重量×2×回数、片側種目は両側で×2、自重=体重×回数
+
+## アプリの自動観察メモ
+${notes.length?notes.map(s=>'- '+s).join('\n'):'- 特筆すべき検出事項はありません。'}
+
+## 週間ボリューム推移
+${wkVolArr.join('\n')||'- データなし'}
+
+## トレーニング頻度（週あたり日数）
+${wkDaysArr.join('\n')||'- データなし'}
+
+## 平均RPE推移（疲労の目安）
+${wkRpeArr.join('\n')||'- RPE入力なし'}
+
+## 体重推移
+${bwArr.join('\n')||'- 記録なし'}
+
+## 種目別の推移（対象: ${targets.length}種目）
+${exBlocks||'（対象種目が選択されていません）'}
+
+まずは上記の分析と気づきを聞かせてください。そこから先は、あなたの質問に答えながら、次のメニューや調整方針を対話で一緒に決めていきましょう。`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown'}));
+  a.download='筋トレコーチング依頼-'+today()+'.md';a.click();closeExport();toast('📄 ファイルを作成しました');
+}
+/* 旧（未使用・互換のため残置） */
+function exportAI_legacy(){
+  if(!DB.entries.length){toast('記録がありません');return;}
+  const wk=weekKey(today());const bp={};
+  DB.entries.filter(e=>weekKey(e.date)===wk).forEach(e=>{bp[e.part]=(bp[e.part]||0)+e.sets.length;});
+  const byEx={};DB.entries.forEach(e=>{(byEx[e.exName]=byEx[e.exName]||[]).push(e);});
+  let exLines='';
+  Object.entries(byEx).forEach(([name,arr])=>{
+    const sorted=[...arr].sort((a,b)=>a.date<b.date?1:-1).slice(0,2);
+    exLines+=`- ${name}（${sorted[0].part}/${EQUIPS[sorted[0].equip]}）\n`;
+    sorted.forEach(e=>{exLines+=`    ${e.date}: `+e.sets.map(s=>setDisp(e,s)+(s.rpe?`@RPE${s.rpe}`:'')).join(', ')+`（${Math.round(entryVolume(e)).toLocaleString()}vol）\n`;});
+  });
+  const curBW=getBW(today());
+  const md=`# 筋トレ記録 — AIコーチング依頼
+
+あなたは筋トレの専門コーチです。以下の私のトレーニング記録を分析し、
+1) 現状の評価、2) 次回の具体的メニュー（種目・重量・回数・セット）、3) 今後1〜2週間の調整方針を、
+筋トレ科学（漸進性過負荷・週間ボリューム10〜20セット/部位・適切な頻度）に基づいて提案してください。
+
+## 基本情報
+- 出力日: ${today()}　体重: ${curBW?curBW+'kg':'未登録'}
+- 総セッション: ${trainDays().length}　週目標の連続達成: ${calcStreak()}週　週目標: ${DB.weekGoal}回
+- ボリューム: バーベル/マシン=重量×回数、ダンベル=片手×2×回数、片側種目は両側で×2、自重=体重×回数
+
+## 今週の部位別セット数（目安: 週10〜20セット/部位）
+${BODYPARTS.map(p=>`- ${p}: ${bp[p]||0}セット`).join('\n')}
+
+## 種目別 直近の記録（新しい順・最大2回）
+${exLines}
+以上を踏まえ、次回トレーニングのメニューを具体的に組んでください。`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([md],{type:'text/markdown'}));
+  a.download='筋トレコーチング依頼-'+today()+'.md';a.click();toast('📄 ファイルを作成しました');
+}
+
+/* ===================== データ管理 ===================== */
+function exportData(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}));a.download='workout-backup-'+today()+'.json';a.click();}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{DB=migrate(JSON.parse(r.result));save();toast('読み込みました');refreshDateUI();updateStreak();}catch(e){toast('読み込み失敗');}};r.readAsText(f);}
+function wipe(){if(confirm('全データを削除しますか？')){DB={entries:[],customEx:[],favs:[],archived:[],weekGoal:4,bwLog:[],profile:{},balanceMetric:'sets',balanceMin:10,balanceMax:20,rmFormula:'average'};save();refreshDateUI();updateStreak();toast('削除しました');}}
+function loadDemo(){
+  DB={entries:[],customEx:[],favs:['ベンチプレス','スクワット'],archived:[],weekGoal:3,bwLog:[],
+    profile:{goals:['筋肥大','筋力向上'],weak:'肩の前部',injury:'特になし',days:'4'},
+    balanceMetric:'sets',balanceMin:10,balanceMax:20,rmFormula:'average'};
+  const lib={'ベンチプレス':['胸','barbell',50,0],'ダンベルカール':['腕','dumbbell',14,0],
+    'スクワット':['脚','barbell',60,0],'ダンベルショルダープレス':['肩','dumbbell',16,0],
+    'ラットプルダウン':['背中','cable',45,0],'ワンハンドダンベルロウ':['背中','dumbbell',22,1]};
+  const names=Object.keys(lib),now=new Date();
+  for(let wk=5;wk>=0;wk--){
+    // 体重ログ（週次・微増）
+    const bd=new Date(now);bd.setDate(bd.getDate()-wk*7);DB.bwLog.push({date:fmt(bd),kg:64+(5-wk)*0.4});
+    [1,3,5].forEach((off,di)=>{
+      const d=new Date(now);d.setDate(d.getDate()-wk*7-(6-off));
+      for(let k=0;k<2;k++){
+        const name=names[(di*2+k+wk)%names.length];const[part,equip,base,uni]=lib[name];
+        const w=base+(5-wk)*2.5;
+        DB.entries.push({id:Math.random().toString(36).slice(2),date:fmt(d),exName:name,part,equip,uni:!!uni,sides:uni?2:1,
+          sets:[1,2,3].map(()=>({w,reps:8+Math.floor(Math.random()*3),rpe:7+Math.floor(Math.random()*3)}))});
+      }
+    });
+  }
+  save();toast('デモデータを投入しました');refreshDateUI();updateStreak();go('dash');
+}
+
+/* ===================== 初期化 ===================== */
+$('#bwDate').value=today();
+refreshDateUI();renderSelEx();renderSets();updateStreak();
+
+/* PWA: Service Worker登録（http/httpsで配信されている場合のみ。file://直開きでも問題なく動く） */
+if('serviceWorker' in navigator&&(location.protocol==='https:'||['localhost','127.0.0.1'].includes(location.hostname))){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
