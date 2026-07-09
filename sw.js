@@ -3,9 +3,9 @@
    - HTML(ナビゲーション)はネットワーク優先: オンラインなら常に最新、オフラインならキャッシュ。
    - アイコン・manifest等はキャッシュ優先。
    - アプリを更新したら CACHE のバージョン番号を上げること（古いキャッシュは activate で削除される）。 */
-const CACHE = 'kintore-lab-v1';
+const CACHE = 'kintore-lab-v2';
 const ASSETS = [
-  './workout-app.html',
+  './index.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -37,7 +37,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(req, copy));
           return res;
         })
-        .catch(() => caches.match(req).then(r => r || caches.match('./workout-app.html')))
+        .catch(() => caches.match(req).then(r => r || caches.match('./index.html')))
     );
   } else {
     // キャッシュ優先（なければ取得してキャッシュ）
