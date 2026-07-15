@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#fcfaf7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="筋トレLab">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>筋トレ Lab</title>
+</head>
+<body>
+
+<svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-brand" viewBox="0 0 24 24"><path d="M5 8v8M3.5 10v4M18.5 8v8M20.5 10v4M5 12h14"/><path d="M8 9.5v5M16 9.5v5"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22c4.1 0 7-2.7 7-6.5 0-3-1.8-5.2-4.4-7.8.1 2-1.1 3.2-2.4 3.9.2-3-1.1-5.1-3.7-7.2.2 3.3-3.5 5.2-3.5 9.3C5 18.4 8 22 12 22Z"/><path d="M9.5 17.6c0 1.3 1 2.4 2.5 2.4s2.5-1 2.5-2.4c0-1.1-.7-2-1.8-3.1.1.8-.4 1.4-1 1.8.1-1.3-.5-2.2-1.4-3.1.1 1.6-1.3 2.6-1.3 4.4Z"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5M12 7v5l3 2"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/><path d="M4 10h2M10 4h2M16 13h2"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m16.5 7.5 4-4M17 3.5h3.5V7"/></symbol>
+  <symbol id="i-balance" viewBox="0 0 24 24"><path d="M12 3v18M5 6h14M4 20h16"/><path d="m5 7-3 6h6L5 7ZM19 7l-3 6h6l-3-6Z"/></symbol>
+  <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M6 8v8M4 10v4M18 8v8M20 10v4M6 12h12"/><path d="M8.5 9.5v5M15.5 9.5v5"/></symbol>
+  <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4.5 18a8 8 0 1 1 15 0"/><path d="m12 12 4-3M12 18h.01"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 11a4 4 0 0 1 8 0M12 11l2-2"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.4 4.6L6 9l4.6 1.4L12 15l1.4-4.6L18 9l-4.6-1.4L12 3ZM19 15l-.8 2.2L16 18l2.2.8L19 21l.8-2.2L22 18l-2.2-.8L19 15ZM5 15l-.7 1.7L2.5 17.5l1.8.8L5 20l.7-1.7 1.8-.8-1.8-.8L5 15Z"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 4v4M15 10v4M10 16v4"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"/><path d="M14 3v6h6M8 15h8M8 11h3"/></symbol>
+  <symbol id="i-archive" viewBox="0 0 24 24"><path d="M4 8h16v12H4zM3 4h18v4H3zM10 12h4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 6H5v1a4 4 0 0 0 3 3.9M16 6h3v1a4 4 0 0 1-3 3.9M12 13v4M8 21h8M9 17h6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="logo"><span class="brand-mark"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-brand"/></svg></span> 筋トレ Lab</div>
+  <div class="streakpill"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-flame"/></svg><span id="streakNum">0</span>週連続</div>
+</header>
+
+<!-- ============ 記録 ============ -->
+<section id="page-log" class="wrap">
+  <div class="card">
+    <h2><span class="section-icon"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-note"/></svg></span>トレーニングを記録</h2>
+    <label class="fld">日付</label>
+    <button class="curdate" id="curDate" onclick="toggleCal()">—</button>
+    <div id="cal" class="cal hide"></div>
+
+    <label class="fld">種目</label>
+    <button class="exsel" onclick="openPicker()">
+      <div><div class="nm" id="selExName">種目を選ぶ</div><div class="meta" id="selExMeta">タップしてライブラリから選択</div></div>
+      <span class="ar"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-chevron"/></svg></span>
+    </button>
+    <div id="lastHint" class="muted" style="margin-top:7px"></div>
+
+    <div id="setsArea" class="hide">
+      <div id="sideSel" class="hide" style="margin-top:12px">
+        <label class="fld" style="margin-top:0">実施範囲（片側ずつ行う種目）</label>
+        <div class="seg"><button id="sideBoth" class="on" onclick="setSide(2)">両側</button><button id="sideOne" onclick="setSide(1)">片側のみ</button></div>
+      </div>
+      <label class="fld" id="setsLabel">セット</label>
+      <div id="sets"></div>
+      <button class="btn ghost sm" style="width:100%;margin-top:2px" onclick="addSet()">＋ セットを追加（前回値を複製）</button>
+      <div style="height:12px"></div>
+      <button class="btn" onclick="saveEntry()">この種目を保存</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-history"/></svg></span>この日の記録 <span class="sub" id="todayLabel"></span></h2>
+    <div id="todayLog"></div>
+  </div>
+</section>
+
+<!-- ============ 履歴 ============ -->
+<section id="page-hist" class="wrap hide">
+  <div class="card"><h2><span class="section-icon"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-history"/></svg></span>履歴 <span class="sub">タップで編集・削除</span></h2><div id="histList"></div></div>
+</section>
+
+<!-- ============ 分析 ============ -->
+<section id="page-dash" class="wrap hide">
+  <div class="card">
+    <h2><span class="section-icon analysis"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-target"/></svg></span>習慣化</h2>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="ring">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="42" fill="none" stroke="#ede6dd" stroke-width="8"/>
+          <circle id="weekRing" cx="48" cy="48" r="42" fill="none" stroke="#db5c38" stroke-width="8"
+            stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 48 48)"/>
+        </svg>
+        <div class="ringn"><b id="weekDays">0</b><span>今週/目標</span></div>
+      </div>
+      <div style="flex:1">
+        <div class="row" style="margin-bottom:9px">
+          <div class="stat"><div class="lbl">週目標の連続達成</div><div class="big" id="streakBig">0</div></div>
+          <div class="stat"><div class="lbl">総セッション</div><div class="big" id="totSess">0</div></div>
+        </div>
+        <div class="muted" id="habitMsg"></div>
+      </div>
+    </div>
+    <div style="margin-top:14px" id="badges"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon analysis"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-calendar"/></svg></span>活動カレンダー <span class="sub" id="actCalLbl"></span></h2>
+    <div id="actCal" class="cal" style="margin-top:0"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon analysis"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-chart"/></svg></span>ボリューム推移</h2>
+    <div class="seg" style="margin-bottom:6px">
+      <button id="pmWeek" class="on" onclick="setVolMode('week')">週別</button>
+      <button id="pmMonth" onclick="setVolMode('month')">月別</button>
+      <button id="pmCustom" onclick="setVolMode('custom')">任意期間</button>
+    </div>
+    <div id="customRange" class="hide" style="margin:8px 0">
+      <div class="row">
+        <div><label class="fld" style="margin-top:0">開始</label><input type="date" id="rangeFrom" class="inp" onchange="renderVolBars()"></div>
+        <div><label class="fld" style="margin-top:0">終了</label><input type="date" id="rangeTo" class="inp" onchange="renderVolBars()"></div>
+      </div>
+    </div>
+    <div class="barwrap" id="volBars"></div>
+    <div class="muted" style="margin-top:8px;text-align:center" id="volNote"></div>
+  </div>
+
+  <div class="card"><h2><span class="section-icon analysis"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-balance"/></svg></span>部位バランス <span class="sub">今週</span></h2><div id="balance"></div></div>
+
+  <div class="card">
+    <h2><span class="section-icon analysis"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-dumbbell"/></svg></span>種目別の詳細</h2>
+    <select id="exDetailSel" class="inp" onchange="renderExDetail()"></select>
+    <div id="exDetail" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon analysis"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-gauge"/></svg></span>RPE推移 <span class="sub">週平均・疲労の目安</span></h2>
+    <div id="rpeChart"></div>
+    <p class="muted" style="margin-top:6px">RPEが継続的に高い（9前後）と疲労蓄積のサイン。適度なディロードを。</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon analysis"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-calendar"/></svg></span>トレーニング頻度 <span class="sub">週あたりの日数</span></h2>
+    <div class="row" style="margin-bottom:8px">
+      <div class="stat"><div class="lbl">直近4週 平均</div><div class="big" id="freqAvg">0<span style="font-size:13px"> 回/週</span></div></div>
+      <div class="stat"><div class="lbl">今週</div><div class="big" id="freqNow">0<span style="font-size:13px"> 回</span></div></div>
+    </div>
+    <div class="barwrap" id="freqBars" style="height:90px"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon analysis"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-scale"/></svg></span>体重推移</h2>
+    <div class="row bw-form">
+      <div class="bw-date"><label class="fld" style="margin-top:0">日付</label><input type="date" id="bwDate" class="inp"></div>
+      <div class="bw-value"><label class="fld" style="margin-top:0">体重kg</label><input type="number" step="0.1" id="bwVal" class="inp" placeholder="65"></div>
+      <div class="bw-submit"><button class="btn sm" onclick="addBW()">記録</button></div>
+    </div>
+    <div id="bwChart" style="margin-top:12px"></div>
+    <div id="bwList" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-sparkles"/></svg></span>AIコーチ用エクスポート</h2>
+    <p class="sub" style="font-size:13px;margin-top:-4px">目標・コンディションを入力し、期間と対象種目を選んで「推移データ＋アプリの観察メモ＋あなたの文脈」をファイル化。チャット版AIに添付すれば費用ゼロで個別アドバイスが得られます。</p>
+    <button class="btn" style="margin-top:8px" onclick="openExportSheet()">コーチング用ファイルを作成</button>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-sliders"/></svg></span>設定</h2>
+    <label class="fld" style="margin-top:0">週間目標（回/週）</label>
+    <input type="number" id="wgInput" class="inp" onchange="setWeekGoal(this.value)">
+    <label class="fld">部位バランスの指標</label>
+    <div class="seg"><button id="bmSets" onclick="setBalanceMetric('sets')">セット数</button><button id="bmVol" onclick="setBalanceMetric('volume')">ボリューム</button></div>
+    <div id="balRangeWrap">
+      <label class="fld">目安レンジ（セット/週）</label>
+      <div class="row"><input type="number" id="balMin" class="inp" placeholder="下限" onchange="setBalanceRange()"><input type="number" id="balMax" class="inp" placeholder="上限" onchange="setBalanceRange()"></div>
+    </div>
+    <label class="fld">推定1RMの計算式</label>
+    <select id="rmFormula" class="inp" onchange="setRMFormula(this.value)">
+      <option value="average">平均（Epley＋Brzycki・推奨）</option>
+      <option value="epley">Epley</option>
+      <option value="brzycki">Brzycki</option>
+    </select>
+    <p class="muted" style="margin-top:6px">※ 推定1RMはどの式も近似です。10〜12回を超えると誤差が大きくなります（低レップほど正確）。</p>
+  </div>
+
+  <div class="card">
+    <h2><span class="section-icon"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-database"/></svg></span>データ管理</h2>
+    <div class="row">
+      <button class="btn ghost sm" style="width:100%" onclick="exportData()">バックアップ</button>
+      <button class="btn ghost sm" style="width:100%" onclick="document.getElementById('imp').click()">読み込み</button>
+    </div>
+    <input type="file" id="imp" accept="application/json" class="hide" onchange="importData(event)">
+    <button class="btn ghost sm" style="width:100%;margin-top:8px" onclick="loadDemo()">デモデータを入れて試す</button>
+    <button class="btn ghost sm" style="width:100%;margin-top:8px;color:var(--bad)" onclick="wipe()">全データ削除</button>
+  </div>
+</section>
+
+<nav class="nav">
+  <button data-pg="log" class="on" onclick="go('log')"><span class="ic"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-note"/></svg></span>記録</button>
+  <button data-pg="hist" onclick="go('hist')"><span class="ic"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-history"/></svg></span>履歴</button>
+  <button data-pg="dash" onclick="go('dash')"><span class="ic"><svg class="ui-icon" viewBox="0 0 24 24"><use href="#i-chart"/></svg></span>分析</button>
+</nav>
+
+<!-- ピッカー -->
+<div class="scrim hide" id="pickerScrim" onclick="if(event.target===this)closePicker()">
+  <div class="sheet">
+    <h3 id="pickTitle">種目を選ぶ <span class="close" onclick="closePicker()">×</span></h3>
+    <input class="inp" id="exSearch" placeholder="種目名で検索" oninput="renderPicker()">
+    <div id="pickCats" style="margin-top:10px"></div>
+    <div id="pickList"></div>
+    <div id="customForm" class="hide" style="margin-top:10px;border-top:1px solid var(--line);padding-top:10px">
+      <label class="fld">自作種目の名前</label>
+      <input class="inp" id="cName" placeholder="例: ケトルベルスイング">
+      <div class="row" style="margin-top:8px">
+        <div><label class="fld">部位</label><select class="inp" id="cPart"></select></div>
+        <div><label class="fld">器具</label><select class="inp" id="cEquip"></select></div>
+      </div>
+      <label class="check"><input type="checkbox" id="cUni"> 片側ずつ行う種目（記録時に両側/片側を選べる）</label>
+      <button class="btn sm" style="width:100%;margin-top:10px" onclick="addCustom()">追加して選択</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn ghost sm" style="width:100%" onclick="toggleCustom()">＋ 自作種目</button>
+      <button class="btn ghost sm" style="width:100%" id="archBtn" onclick="toggleArchiveView()">アーカイブ</button>
+    </div>
+  </div>
+</div>
+
+<!-- 編集 -->
+<div class="scrim hide" id="editScrim" onclick="if(event.target===this)closeEdit()">
+  <div class="sheet">
+    <h3 id="editTitle">記録を編集 <span class="close" onclick="closeEdit()">×</span></h3>
+    <label class="fld">日付</label>
+    <input type="date" class="inp" id="editDate">
+    <div id="editSideSel" class="hide" style="margin-top:10px">
+      <label class="fld" style="margin-top:0">実施範囲</label>
+      <div class="seg"><button id="eSideBoth" onclick="setEditSide(2)">両側</button><button id="eSideOne" onclick="setEditSide(1)">片側のみ</button></div>
+    </div>
+    <label class="fld" id="editSetsLabel">セット</label>
+    <div id="editSets"></div>
+    <button class="btn ghost sm" style="width:100%;margin-top:2px" onclick="editAddSet()">＋ セット追加</button>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost sm" style="width:100%;color:var(--bad)" onclick="editDelete()">削除</button>
+      <button class="btn sm" style="width:100%" onclick="editSave()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- エクスポート設定 -->
+<div class="scrim hide" id="exportScrim" onclick="if(event.target===this)closeExport()">
+  <div class="sheet">
+    <h3>コーチング用ファイル <span class="close" onclick="closeExport()">×</span></h3>
+    <p class="sub" style="font-size:12.5px;margin-top:-4px">入力内容は次回も保存されます。空欄でもOK。</p>
+
+    <div class="seclbl">目標・コンディション</div>
+    <label class="fld" style="margin-top:4px">目標（複数選択OK）</label>
+    <div id="pGoalBox">
+      <label class="check"><input type="checkbox" class="goalchk" value="筋肥大"> 筋肥大（マッスル）</label>
+      <label class="check"><input type="checkbox" class="goalchk" value="筋力向上"> 筋力向上（ストレングス）</label>
+      <label class="check"><input type="checkbox" class="goalchk" value="増量（バルク）"> 増量（バルク）</label>
+      <label class="check"><input type="checkbox" class="goalchk" value="減量（カット）"> 減量（カット）</label>
+      <label class="check"><input type="checkbox" class="goalchk" value="現状維持・健康"> 現状維持・健康</label>
+    </div>
+    <label class="fld">弱点・伸ばしたい部位</label>
+    <input id="pWeak" class="inp" placeholder="例: 肩の前部、上腕二頭筋">
+    <label class="fld">ケガ・制限</label>
+    <input id="pInjury" class="inp" placeholder="例: 右肩に違和感、腰は無理しない">
+    <label class="fld">週のトレ可能日数</label>
+    <input type="number" id="pDays" class="inp" placeholder="例: 4">
+
+    <div class="seclbl" style="margin-top:14px">出力期間</div>
+    <select id="pPeriod" class="inp" onchange="renderExportExList()">
+      <option value="14">直近2週</option>
+      <option value="28">直近4週</option>
+      <option value="56" selected>直近8週</option>
+      <option value="84">直近12週</option>
+      <option value="168">直近6ヶ月</option>
+      <option value="365">直近1年</option>
+      <option value="0">全期間</option>
+      <option value="custom">任意期間（日付指定）</option>
+    </select>
+    <div id="pCustomRange" class="hide" style="margin-top:8px">
+      <div class="row">
+        <div><label class="fld" style="margin-top:0">開始</label><input type="date" id="pFrom" class="inp" onchange="renderExportExList()"></div>
+        <div><label class="fld" style="margin-top:0">終了</label><input type="date" id="pTo" class="inp" onchange="renderExportExList()"></div>
+      </div>
+    </div>
+
+    <div class="seclbl" style="margin-top:14px">対象種目</div>
+    <div class="row" style="margin:2px 0 6px">
+      <button class="btn ghost sm" style="width:100%" onclick="exExAll(true)">全選択</button>
+      <button class="btn ghost sm" style="width:100%" onclick="exExAll(false)">全解除</button>
+    </div>
+    <div id="pExList" style="max-height:160px;overflow:auto"></div>
+
+    <button class="btn" style="margin-top:14px" onclick="buildExport()">ファイルを作成</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
