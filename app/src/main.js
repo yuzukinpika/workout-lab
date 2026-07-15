@@ -13,6 +13,7 @@ import {
 } from './analysis.js';
 import {openExportSheet,closeExport,exExAll,exToggle,renderExportExList,buildExport} from './export.js';
 import {exportData,importData,loadDemo,wipe} from './data.js';
+import {initPersistence} from './persist.js';
 
 /* inline onclick等（静的HTML＋innerHTMLで生成するHTML）から参照される関数をグローバルに公開する。
    モジュール化後もHTML側のイベント記述を変えないためのブリッジ。 */
@@ -28,5 +29,8 @@ Object.assign(window,{
 });
 
 /* ===================== 初期化 ===================== */
-$('#bwDate').value=today();
-refreshDateUI();renderSelEx();renderSets();updateStreak();
+(async()=>{
+  try{await initPersistence();}catch(e){}
+  $('#bwDate').value=today();
+  refreshDateUI();renderSelEx();renderSets();updateStreak();
+})();

@@ -54,9 +54,11 @@ export function migrate(d){
   return out;
 }
 export let DB=load();
+let saveHook=null;
 /* importData/wipe/loadDemo などDB全体を差し替える際に使う（ESMのimportは再代入できないため） */
 export function setDB(d){DB=d;}
-export function save(){localStorage.setItem(KEY,JSON.stringify(DB));}
+export function setSaveHook(fn){saveHook=fn;}
+export function save(){const json=JSON.stringify(DB);localStorage.setItem(KEY,json);if(saveHook)saveHook(json);}
 export function exMap(){const m={};[...BUILTIN,...DB.customEx].forEach(x=>m[x.name]=x);return m;}
 export function hasUserData(){return !!(DB.entries.length||DB.bwLog.length||DB.customEx.length||DB.favs.length||DB.archived.length);}
 export function exNameExists(name){return [...BUILTIN,...DB.customEx].some(x=>x.name===name);}
