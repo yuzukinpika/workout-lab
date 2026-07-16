@@ -95,15 +95,14 @@ function renderBalance(){
   DB.entries.filter(e=>weekKey(e.date)===wk).forEach(e=>{data[e.part]=(data[e.part]||0)+(metric==='volume'?entryVolume(e):e.sets.length);});
   const total=Object.values(data).reduce((a,b)=>a+b,0);
   if(!total){$('#balance').innerHTML='<div class="empty">今週のデータがありません</div>';return;}
-  const mn=DB.balanceMin||10,mx=DB.balanceMax||20,unit=metric==='volume'?'vol':'セット';
+  const unit=metric==='volume'?'vol':'セット';
   let h='<div style="margin-bottom:10px">';
   BODYPARTS.forEach(p=>{const n=data[p]||0,pct=Math.round(n/total*100);
-    let st='';if(metric==='sets')st=n===0?'':(n<mn?'<span style="color:var(--warn)"> 不足</span>':(n>mx?'<span style="color:var(--bad)"> 過多</span>':'<span style="color:var(--ok)"> 適正</span>'));
     const val=metric==='volume'?Math.round(n).toLocaleString():n;
-    h+=`<div class="legrow"><span class="sw" style="background:${COLORS[p]||'#888'}"></span>${p} <span class="pct">${val}${unit} (${pct}%)${st}</span></div>`;});
+    h+=`<div class="legrow"><span class="sw" style="background:${COLORS[p]||'#888'}"></span>${p} <span class="pct">${val}${unit} (${pct}%)</span></div>`;});
   h+='</div><div style="display:flex;height:14px;border-radius:7px;overflow:hidden;border:1px solid var(--line)">';
   BODYPARTS.forEach(p=>{const n=data[p]||0;if(n)h+=`<div style="width:${n/total*100}%;background:${COLORS[p]||'#888'}"></div>`;});
-  h+='</div>'+(metric==='sets'?`<p class="muted" style="margin-top:8px">目安：1部位あたり週${mn}〜${mx}セット</p>`:'<p class="muted" style="margin-top:8px">部位別の総ボリューム比率を表示しています</p>');
+  h+='</div>';
   $('#balance').innerHTML=h;
 }
 /* 種目別詳細 */
