@@ -27,9 +27,21 @@ npm run test       # 純粋関数のユニットテスト（Vitest）
 - `src/data.js` — バックアップ/読み込み/デモ/全削除
 - `src/nav.js` / `src/main.js` — タブ切替・初期化・windowブリッジ
 
+## iOS（Capacitor・SPM構成でCocoaPods不要）
+
+```sh
+npm run build && npx cap sync ios   # web資産をiOSへ反映
+node scripts/gen-assets.mjs && npx capacitor-assets generate --ios  # アイコン/スプラッシュ再生成
+# ビルドはXcodeで ios/App/App.xcodeproj を開くか、DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild ...
+```
+
+- appId: `com.kintorelab.app` / データ保護: localStorage＋Preferencesミラー（`src/persist.js`。iOSのlocalStorage消去対策）
+- 申請メタデータ下書き: `store/metadata.md`
+
 ## 現行PWAとの差分（意図的なもの）
 
 - Service Worker / manifest は未搭載（Capacitor化するアプリ本体には不要。必要になったら再検討）
 - CSPメタタグは Vite dev では外し、`npm run build` 時に vite.config.js が現行と同じ内容を注入する
+- セーフエリア対応（viewport-fit=cover＋ヘッダーpadding常時適用）。Webではenv()=0のため見た目は同一
 
 データモデル（`workoutLab_v5`）と計算ロジックは HANDOFF.md の仕様どおり維持すること。
