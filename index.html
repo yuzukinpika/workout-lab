@@ -206,7 +206,7 @@
       </div>
       <label class="fld" id="setsLabel">セット</label>
       <div id="sets"></div>
-      <button class="btn ghost sm" style="width:100%;margin-top:2px" onclick="addSet()">＋ セットを追加（前回値を複製）</button>
+      <button class="btn ghost sm" style="width:100%;margin-top:2px" onclick="addSet()">＋ セットを追加</button>
       <div style="height:12px"></div>
       <button class="btn" onclick="saveEntry()">この種目を保存</button>
     </div>
@@ -704,11 +704,11 @@ function renderPicker(){
     $('#pickList').innerHTML='<div class="seclbl">アーカイブ済み</div>'+(list.length?list.map(exrow).join(''):'<div class="empty">アーカイブはありません</div>');return;}
   let html='';
   if(!q){
-    const fav=all.filter(x=>DB.favs.includes(x.name)&&!arch.has(x.name)&&match(x));
-    if(fav.length)html+='<div class="seclbl">★ お気に入り</div>'+fav.map(exrow).join('');
     const recent=[...new Set(DB.entries.slice().reverse().map(e=>e.exName))].slice(0,6)
       .map(n=>all.find(x=>x.name===n)).filter(x=>x&&!arch.has(x.name)&&!DB.favs.includes(x.name)&&match(x));
     if(recent.length)html+='<div class="seclbl">最近使った</div>'+recent.map(exrow).join('');
+    const fav=all.filter(x=>DB.favs.includes(x.name)&&!arch.has(x.name)&&match(x));
+    if(fav.length)html+='<div class="seclbl">★ お気に入り</div>'+fav.map(exrow).join('');
   }
   const rest=all.filter(x=>!arch.has(x.name)&&match(x));
   html+='<div class="seclbl">'+(q?'検索結果':'すべて')+'</div>'+(rest.length?rest.map(exrow).join(''):'<div class="empty">該当なし</div>');
@@ -727,10 +727,12 @@ function renderSelEx(){
   $('#setsLabel').textContent=setsLabelText(selEx.equip);
   showLastHint();
   const initialMode=selEx.equip==='bodyweight'?lastBodyweightMode(selEx.name):'bw';
-  if(!setsState.length)setsState=[{w:'',reps:'',rpe:'',m:initialMode}];
+  if(!setsState.length)setsState=[ghostSet(0,initialMode)];
   else{
     const blankInitial=setsState.length===1&&setsState[0].w===''&&setsState[0].reps===''&&(setsState[0].rpe===''||setsState[0].rpe==null);
-    setsState.forEach(s=>{if(blankInitial||!['bw','plus','minus'].includes(s.m))s.m=initialMode;});
+    // 種目を切り替えたらゴーストは新しい種目の前回値で引き直す（旧種目の値を残さない）
+    if(blankInitial)setsState=[ghostSet(0,initialMode)];
+    else setsState.forEach((s,i)=>{const g=ghostSet(i,initialMode,setsState[i-1]);s.gw=g.gw;s.greps=g.greps;if(!['bw','plus','minus'].includes(s.m))s.m=g.m;});
   }
   renderSets();
 }
@@ -757,20 +759,31 @@ function lastBodyweightMode(name){
 }
 function nextLoadMode(m){return LOAD_MODES[(LOAD_MODES.indexOf(m)+1)%LOAD_MODES.length];}
 let setsState=[];
+function prevSets(){
+  let latest=null,latestIndex=-1;
+  DB.entries.forEach((e,i)=>{if(e.exName===selEx.name&&(!latest||e.date>latest.date||(e.date===latest.date&&i>latestIndex))){latest=e;latestIndex=i;}});
+  return latest?latest.sets:[];
+}
+function ghostSet(i,initialMode,prev=setsState[i-1]){
+  const p=prevSets()[i],greps=p?String(p.reps??''):prev?String(prev.reps!==''?prev.reps:prev.greps||''):'',gw=p?String(Math.abs(p.w)||''):prev?String(prev.w!==''?prev.w:prev.gw||''):'';
+  const m=selEx.equip==='bodyweight'?(p?loadModeFromWeight(p.w):prev&&LOAD_MODES.includes(prev.m)?prev.m:initialMode):'bw';
+  return {w:'',reps:'',rpe:'',m,gw,greps};
+}
 function renderSets(){
   const eq=selEx?selEx.equip:'barbell';
   $('#sets').innerHTML=setsState.map((s,i)=>`
     <div class="setrow"><span class="n">${i+1}</span>
       ${eq==='bodyweight'?`<button class="set-mode" data-index="${i}" onclick="cycleSetMode(this.dataset.index)">${loadModeLabel(s.m)}</button>`:''}
-      ${eq==='bodyweight'&&s.m==='bw'?'':`<div class="field"><small>${unitLabel(eq,s.m)}</small><input type="number" inputmode="decimal" placeholder="kg" value="${esc(s.w)}" onchange="setVal(${i},'w',this.value)"></div>`}
-      <div class="field"><small>回数</small><input type="number" inputmode="numeric" placeholder="回" value="${esc(s.reps)}" onchange="setVal(${i},'reps',this.value)"></div>
+      ${eq==='bodyweight'&&s.m==='bw'?'':`<div class="field"><small>${unitLabel(eq,s.m)}</small><input type="number" inputmode="decimal" placeholder="${s.w===''&&s.gw!==''?esc(s.gw):'kg'}" value="${esc(s.w)}" onchange="setVal(${i},'w',this.value)"></div>`}
+      <div class="field"><small>回数</small><input type="number" inputmode="numeric" placeholder="${s.reps===''&&s.greps!==''?esc(s.greps):'回'}" value="${esc(s.reps)}" onchange="setVal(${i},'reps',this.value)"></div>
       <div class="field"><small>RPE</small><input type="number" inputmode="decimal" placeholder="任意" value="${esc(s.rpe)}" onchange="setVal(${i},'rpe',this.value)"></div>
       <button class="del" onclick="rmSet(${i})">×</button></div>`).join('');
 }
 function setVal(i,k,v){setsState[i][k]=v;}
 function cycleSetMode(i){const s=setsState[Number(i)];if(!s)return;s.m=nextLoadMode(s.m);renderSets();}
-function addSet(){const l=setsState[setsState.length-1]||{};setsState.push({w:l.w||'',reps:l.reps||'',rpe:'',m:LOAD_MODES.includes(l.m)?l.m:'bw'});renderSets();}
-function rmSet(i){setsState.splice(i,1);if(!setsState.length)setsState=[{w:'',reps:'',rpe:'',m:selEx&&selEx.equip==='bodyweight'?lastBodyweightMode(selEx.name):'bw'}];renderSets();}
+function materializeGhosts(){setsState.forEach(s=>{if(s.w===''&&s.gw!=='')s.w=s.gw;if(s.reps===''&&s.greps!=='')s.reps=s.greps;});renderSets();}
+function addSet(){materializeGhosts();const l=setsState[setsState.length-1],initialMode=selEx.equip==='bodyweight'?lastBodyweightMode(selEx.name):'bw';setsState.push(ghostSet(setsState.length,initialMode,l));renderSets();}
+function rmSet(i){setsState.splice(i,1);if(!setsState.length)setsState=[ghostSet(0,selEx&&selEx.equip==='bodyweight'?lastBodyweightMode(selEx.name):'bw')];renderSets();}
 function showLastHint(){
   if(!selEx){$('#lastHint').textContent='';return;}
   const past=DB.entries.filter(e=>e.exName===selEx.name).sort((a,b)=>a.date<b.date?1:-1);
@@ -779,6 +792,8 @@ function showLastHint(){
 }
 function saveEntry(){
   if(!selEx){toast('種目を選んでください');return;}
+  // ゴーストだけの空行も保存時に確定する。不要なら×で削除
+  materializeGhosts();
   const res=cleanSets(setsState);if(res.error){toast(res.error);return;}
   const sets=res.sets;
   if(!sets.length){toast('セットを入力してください');return;}
